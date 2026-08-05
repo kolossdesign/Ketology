@@ -5,10 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Кетолоджи — веган-коктейли с МСТ-маслом | Siberian Wellness</title>
 <meta name="description" content="Полноценная замена приема пищи или перекус: веган-коктейли «Кетолоджи» с МСТ-маслом, растительным белком и 13 витаминами.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/Gerbera-Light.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/Gerbera-Medium.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Gerbera — шрифт макета. Ровно те два начертания, что используются в Figma-ноде. */
+@font-face{
+  font-family:'Gerbera';font-style:normal;font-weight:300;font-display:swap;
+  src:url('assets/fonts/Gerbera-Light.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Gerbera';font-style:normal;font-weight:500;font-display:swap;
+  src:url('assets/fonts/Gerbera-Medium.woff2') format('woff2');
+}
 /* ── Токены. Значения сняты из Figma-ноды 495:248 (Ketology_product_LP) ───── */
 :root{
   --bg:#FDF9F5;
@@ -27,9 +35,7 @@
   --r-row:12px;
   --r-pill:57px;
   --shell:1440px;
-  /* WHY: Gerbera — коммерческий шрифт макета, в вебе недоступен.
-     Onest подобран как ближайшая замена: та же геометрическая гротеска + кириллица. */
-  --font:'Gerbera','Onest',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --font:'Gerbera',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth}
