@@ -1,0 +1,534 @@
+<!-- Ketology LP — ru. Сгенерировано build.py, править content/ru.json -->
+<link rel="preload" href="../../assets/fonts/Gerbera-Light.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/Gerbera-Medium.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* защита от стилей страницы-хоста */
+.ketology-lp,.ketology-lp *,.ketology-lp *::before,.ketology-lp *::after{
+  margin:0;padding:0;border:0;outline:0;box-sizing:border-box;
+  font:inherit;color:inherit;text-align:inherit;text-transform:none;
+  letter-spacing:inherit;text-decoration:none;list-style:none;
+  background:none;box-shadow:none;float:none;
+}
+/* Gerbera — шрифт макета. Ровно те два начертания, что используются в Figma-ноде. */
+
+
+@font-face{
+  font-family:'Gerbera';font-style:normal;font-weight:300;font-display:swap;
+  src:url('../../assets/fonts/Gerbera-Light.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Gerbera';font-style:normal;font-weight:500;font-display:swap;
+  src:url('../../assets/fonts/Gerbera-Medium.woff2') format('woff2');
+}/* ── Токены. Значения сняты из Figma-ноды 495:248 (Ketology_product_LP) ───── */
+
+
+.ketology-lp{
+  --bg:#FDF9F5;
+  --beige:#FCEADB;
+  --beige-soft:#FDEFE4;
+  --cream:#FFF5D4;
+  --grey-card:#F3F3F3;
+  --accent:#EE4729;
+  --accent-deep:#D23A00;
+  --accent-dot:#E22B0B;
+  --ink:#161616;
+  --ink-2:#1C1C1C;
+  --navy:#06112E;
+  --white:#fff;
+  --r-card:20px;
+  --r-row:12px;
+  --r-pill:57px;
+  --shell:1440px;
+  --font:'Gerbera',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+.ketology-lp *,.ketology-lp *::before,.ketology-lp *::after{box-sizing:border-box}
+.ketology-lp{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font);font-weight:300;
+  -webkit-font-smoothing:antialiased;
+}
+.ketology-lp img{display:block;max-width:100%}
+.ketology-lp h1,.ketology-lp h2,.ketology-lp h3,.ketology-lp p{margin:0}
+
+.ketology-lp .shell{max-width:var(--shell);margin:0 auto}
+.ketology-lp .pad{padding-inline:20px}
+.ketology-lp .section{margin-top:96px}/* ── Типографика ───────────────────────────────────────────────────────────── */
+
+
+
+.ketology-lp .h1{font-size:40px;line-height:45px;font-weight:500;letter-spacing:-1.2px}
+.ketology-lp .h2{font-size:40px;line-height:48px;font-weight:500;letter-spacing:-1.2px;text-align:center}
+.ketology-lp .h2--tight{line-height:52px;letter-spacing:-.8px}
+.ketology-lp .h3{font-size:32px;line-height:36px;font-weight:500}
+.ketology-lp .h4{font-size:30px;line-height:34px;font-weight:500}
+.ketology-lp .h5{font-size:26px;line-height:32px;font-weight:500}
+.ketology-lp .body{font-size:16px;line-height:21px;font-weight:300}/* ── Кнопка ────────────────────────────────────────────────────────────────── */
+
+
+
+.ketology-lp .btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--accent);color:var(--white);
+  font-size:16px;line-height:21px;font-weight:500;
+  padding:14px 24px 15px;border-radius:var(--r-pill);
+  text-decoration:none;border:0;cursor:pointer;
+  transition:background .18s ease,transform .18s ease;
+}
+.ketology-lp .btn:hover{background:var(--accent-deep)}
+.ketology-lp .btn:active{transform:translateY(1px)}
+.ketology-lp .btn:focus-visible{outline:3px solid var(--navy);outline-offset:3px}/* ── Хром сайта (шапка/подвал взяты из макета растром) ─────────────────────── */
+
+
+
+.ketology-lp .chrome{width:100%;height:auto}
+.ketology-lp .chrome--head{background:#fff}/* ── Hero ──────────────────────────────────────────────────────────────────── */
+
+
+
+.ketology-lp .hero{display:grid;grid-template-columns:629fr 748fr;gap:23px;margin-top:18px}
+.ketology-lp .hero__card{
+  background:var(--beige);border-radius:var(--r-card);
+  padding:44px 64px 64px;display:flex;flex-direction:column;justify-content:space-between;
+}
+.ketology-lp .hero__logo{width:129px;height:auto}
+.ketology-lp .hero__body{display:flex;flex-direction:column;gap:32px;align-items:flex-start;max-width:472px}
+.ketology-lp .hero__lead{max-width:407px}
+.ketology-lp .hero__img{border-radius:var(--r-card);object-fit:cover;width:100%;height:100%}/* ── МСТ ───────────────────────────────────────────────────────────────────── */
+
+
+
+.ketology-lp .mct{display:grid;grid-template-columns:640fr 481fr;gap:80px;align-items:center;margin-top:40px}
+.ketology-lp .mct__img{border-radius:var(--r-card);width:100%;height:auto;object-fit:cover}
+.ketology-lp .mct__text{display:flex;flex-direction:column;gap:32px}
+.ketology-lp .mct__lead{max-width:353px}/* Маркированный список с треугольным маркером (Polygon 7 из макета) */
+
+
+
+.ketology-lp .marks{display:flex;flex-direction:column;gap:12px;list-style:none;margin:0;padding:0}
+.ketology-lp .marks li{display:flex;gap:10px;font-size:16px;line-height:21px;font-weight:300}
+.ketology-lp .marks li::before{
+  content:"";flex:0 0 11px;width:11px;height:11px;margin-top:5px;
+  background:var(--accent);
+  clip-path:polygon(0 0,100% 50%,0 100%);
+}
+.ketology-lp .marks--deep li::before{background:var(--accent-deep)}/* ── Карточки состава ──────────────────────────────────────────────────────── */
+
+
+
+.ketology-lp .composition{display:grid;grid-template-columns:repeat(3,1fr);gap:25px;margin-top:40px}
+.ketology-lp .comp-card{
+  background:var(--beige);border-radius:var(--r-card);
+  padding:25px 24px 32px;display:flex;flex-direction:column;gap:24px;
+}
+.ketology-lp .comp-card__icon{width:180px;height:180px;border-radius:50%;object-fit:cover}
+.ketology-lp .comp-card__title{min-height:96px}
+.ketology-lp .comp-link{
+  display:block;text-align:center;margin-top:40px;
+  font-size:18px;line-height:24px;font-weight:500;color:var(--ink);
+  text-decoration:underline;text-underline-offset:4px;
+}
+.ketology-lp .comp-link:hover{color:var(--accent)}/* ── Нутриенты (градиентный блок) ──────────────────────────────────────────── */
+
+
+
+.ketology-lp .nutri{
+  position:relative;overflow:hidden;border-radius:var(--r-card);
+  background:linear-gradient(135deg,#D94938 0%,#FF8475 100%);
+  color:var(--white);padding:64px 81px;min-height:672px;
+  display:grid;grid-template-columns:minmax(0,666px) minmax(0,1fr);gap:40px;align-items:center;
+}
+.ketology-lp .nutri__blob{
+  position:absolute;right:-18%;top:-40%;width:1355px;height:1326px;border-radius:50%;
+  background:#FFEE95;opacity:.18;pointer-events:none;
+}
+.ketology-lp .nutri__inner{position:relative;z-index:1;display:flex;flex-direction:column;gap:32px}
+.ketology-lp .nutri__title{font-size:40px;line-height:48px;font-weight:500;letter-spacing:-1.2px;max-width:387px}
+.ketology-lp .nutri__note{font-size:18px;line-height:24px;font-weight:300}
+.ketology-lp .nutri__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px 48px;max-width:600px}
+.ketology-lp .stat{display:flex;flex-direction:column;gap:4px}
+.ketology-lp .stat__v{font-size:54px;line-height:65px;font-weight:500;letter-spacing:-1.62px}
+.ketology-lp .stat__v span{font-size:32px;line-height:39px;letter-spacing:-.96px}
+.ketology-lp .stat__l{font-size:20px;line-height:27px;font-weight:300}
+.ketology-lp .nutri__media{
+  position:relative;z-index:1;align-self:center;
+  display:flex;flex-direction:column;gap:16px;justify-content:center;
+}/* WHY: обе картинки блока лежат в одной колонке — ограничиваем высоту,
+   иначе банка вылезает за нижнюю границу градиента */
+
+
+.ketology-lp .nutri__media img{width:100%;height:auto;max-height:260px;object-fit:contain;border-radius:16px}/* ── Сравнение ─────────────────────────────────────────────────────────────── */
+
+
+
+.ketology-lp .compare__head{
+  display:grid;grid-template-columns:608fr 309fr 309fr;gap:12px;
+  margin-top:48px;margin-bottom:12px;
+}
+.ketology-lp .compare__head span{text-align:center;font-weight:500}
+.ketology-lp .compare__head span:nth-child(2){font-size:26px;line-height:35px}
+.ketology-lp .compare__head span:nth-child(3){font-size:20px;line-height:27px}
+.ketology-lp .crow{display:grid;grid-template-columns:608fr 309fr 309fr;gap:12px;margin-bottom:12px}
+.ketology-lp .crow > *{
+  background:var(--white);border-radius:var(--r-row);
+  padding:24px 12px 24px 20px;display:flex;align-items:center;
+  font-size:20px;line-height:27px;font-weight:500;
+}
+.ketology-lp .crow__k{background:var(--beige);justify-content:center;gap:8px;padding-inline:12px}
+.ketology-lp .crow__d{justify-content:center;font-size:18px;line-height:24px;font-weight:300}/* Галочка Кетолоджи и крестик обычной диеты — векторы из макета, отрисованы CSS */
+
+
+.ketology-lp .tick{flex:0 0 20px;width:20px;height:20px;border-radius:50%;background:var(--accent-dot);position:relative}
+.ketology-lp .tick::after{
+  content:"";position:absolute;left:6px;top:5px;width:7px;height:4px;
+  border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);
+}
+.ketology-lp .cross{flex:0 0 20px;width:20px;height:20px;position:relative}
+.ketology-lp .cross::before,.ketology-lp .cross::after{
+  content:"";position:absolute;left:2px;top:9px;width:16px;height:2px;background:var(--ink);border-radius:2px;
+}
+.ketology-lp .cross::before{transform:rotate(45deg)}
+.ketology-lp .cross::after{transform:rotate(-45deg)}
+.ketology-lp .crow__k .tickv{font-size:18px;line-height:24px;font-weight:500;color:var(--accent-dot)}/* ── Задачи (бенто) ────────────────────────────────────────────────────────── */
+
+
+
+.ketology-lp .tasks{
+  display:grid;grid-template-columns:468fr 405fr 405fr;grid-template-rows:306px 306px;
+  gap:16px;margin-top:40px;
+}
+.ketology-lp .task{
+  position:relative;overflow:hidden;background:var(--beige);
+  border-radius:var(--r-card);padding:32px;
+}
+.ketology-lp .task--tall{grid-row:span 2}
+.ketology-lp .task__blob{
+  position:absolute;left:50%;bottom:-42%;translate:-50% 0;
+  width:310px;height:310px;border-radius:50%;background:var(--beige-soft);
+}
+.ketology-lp .task--tall .task__blob{width:545px;height:545px;bottom:-30%}
+.ketology-lp .task__txt{position:relative;z-index:2;display:flex;flex-direction:column;gap:12px;max-width:187px}
+.ketology-lp .task--tall .task__txt{max-width:355px}
+.ketology-lp .task__desc{font-size:16px;line-height:21px;font-weight:300}/* WHY: ширина картинки задаётся на карточку (--img), иначе длинный текст
+   («Кетопитание») подлезает под изображение */
+
+
+.ketology-lp .task__img{
+  position:absolute;z-index:1;right:-8px;bottom:-8px;
+  width:var(--img,52%);height:auto;object-fit:contain;
+}
+.ketology-lp .task--tall .task__img{left:50%;translate:-50% 0;right:auto;width:88%}/* ── Вкусы ─────────────────────────────────────────────────────────────────── */
+
+
+
+.ketology-lp .flavors{display:grid;grid-template-columns:repeat(3,1fr);gap:31px;margin-top:45px}
+.ketology-lp .flavor{
+  position:relative;overflow:hidden;border-radius:var(--r-card);
+  background:var(--cream);min-height:609px;display:flex;flex-direction:column;justify-content:flex-end;
+}
+.ketology-lp .flavor--grey{background:var(--grey-card)}
+.ketology-lp .flavor__pack{
+  position:absolute;top:0;left:50%;translate:-50% 0;
+  width:110%;height:auto;z-index:1;
+}
+.ketology-lp .flavor__foot{
+  position:relative;z-index:2;
+  background:linear-gradient(180deg,rgba(255,243,240,0) 0%,#FFF3F0 22%);
+  padding:64px 30px 32px;display:flex;flex-direction:column;gap:32px;align-items:center;text-align:center;
+}
+.ketology-lp .flavor__name{font-size:30px;line-height:37px;font-weight:500;letter-spacing:-.6px;color:var(--navy)}
+.ketology-lp .flavor__sub{font-size:16px;line-height:21px;font-weight:300;color:var(--navy);margin-top:12px}
+.ketology-lp .flavor__badge{position:absolute;z-index:2;top:134px;left:50%;translate:-50% 0;width:26px}/* ── Качество ──────────────────────────────────────────────────────────────── */
+
+
+
+.ketology-lp .quality{display:grid;grid-template-columns:407px 1fr;gap:264px;align-items:center}
+.ketology-lp .quality__txt{display:flex;flex-direction:column;gap:24px}
+.ketology-lp .quality__logos{display:flex;align-items:center;justify-content:flex-end;gap:72px}/* WHY: логотипы партнёров в макете лежат под маской-заливкой #656462 — повторяем фильтром.
+   Размер берётся из width/height в разметке (значения из Figma): экспорт идёт в 2x,
+   и любой `width:auto` тут отрисовал бы логотипы вдвое крупнее макета. */
+
+
+.ketology-lp .quality__logos img{filter:grayscale(1) opacity(.75)}/* ── Финальный CTA ─────────────────────────────────────────────────────────── */
+
+
+
+.ketology-lp .cta{display:grid;grid-template-columns:690fr 690fr;gap:20px}
+.ketology-lp .cta__img{border-radius:var(--r-card);width:100%;height:100%;object-fit:cover}
+.ketology-lp .cta__card{
+  background:var(--beige);border-radius:var(--r-card);
+  display:flex;flex-direction:column;gap:32px;align-items:center;justify-content:center;
+  text-align:center;padding:64px 109px;min-height:617px;
+}
+.ketology-lp .cta__lead{max-width:277px}/* ── Адаптив ───────────────────────────────────────────────────────────────── */
+
+
+
+@media (max-width:1200px){
+  .ketology-lp .hero,.ketology-lp .mct,.ketology-lp .cta{grid-template-columns:1fr;gap:24px}
+  .ketology-lp .hero__card{padding:40px}
+  .ketology-lp .mct{gap:32px}
+  .ketology-lp .cta__card{padding:56px 40px;min-height:0}
+  .ketology-lp .quality{grid-template-columns:1fr;gap:40px}
+  .ketology-lp .nutri{grid-template-columns:1fr;padding:48px 40px}
+  .ketology-lp .tasks{grid-template-columns:1fr 1fr;grid-template-rows:none}
+  .ketology-lp .task--tall{grid-row:span 1;min-height:420px}
+  .ketology-lp .composition,.ketology-lp .flavors{grid-template-columns:1fr;gap:24px}
+  .ketology-lp .comp-card__title{min-height:0}
+}
+@media (max-width:820px){
+  .ketology-lp .section{margin-top:64px}
+  .ketology-lp .h1,.ketology-lp .h2{font-size:32px;line-height:38px;letter-spacing:-.6px}
+  .ketology-lp .h3{font-size:26px;line-height:31px}
+  .ketology-lp .nutri__title{font-size:30px;line-height:36px}
+  .ketology-lp .nutri__grid{grid-template-columns:repeat(2,1fr);gap:28px}
+  .ketology-lp .stat__v{font-size:40px;line-height:48px}
+  .ketology-lp .tasks{grid-template-columns:1fr}
+  .ketology-lp .compare__head,.ketology-lp .crow{grid-template-columns:1fr;gap:8px}
+  .ketology-lp .compare__head{display:none}
+  .ketology-lp .crow > *{padding:16px}
+  .ketology-lp .crow__k::after{content:" — Кетолоджи";font-weight:300;font-size:14px}
+  .ketology-lp .crow__d::after{content:" — обычная диета";font-weight:300;font-size:14px;margin-left:6px}
+  .ketology-lp .quality__logos{gap:32px;justify-content:flex-start;flex-wrap:wrap}
+  .ketology-lp .quality__logos img{max-height:64px;width:auto}
+}
+
+</style>
+<div class="ketology-lp">
+  <!-- ── Hero ── -->
+  <section class="shell pad">
+    <div class="hero">
+      <div class="hero__card">
+        <img class="hero__logo" src="../../assets/logo-ketology.svg" alt="Кетолоджи" width="129" height="20">
+        <div class="hero__body">
+          <h1 class="h1">Активируйте метаболизм<br>и худейте комфортно</h1>
+          <p class="body hero__lead">Полноценная замена приема пищи или перекус: веган-коктейли&nbsp;“Кетолоджи” с МСТ-маслом, растительным белком и 13&nbsp;витаминами</p>
+          <a class="btn" href="#flavors">Подробнее</a>
+        </div>
+      </div>
+      <img class="hero__img" src="../../assets/hero-main.webp" alt="Коктейли Кетолоджи" width="748" height="639">
+    </div>
+  </section>
+
+  <!-- ── МСТ + состав ── -->
+  <section class="shell pad section">
+    <h2 class="h2 h2--tight" style="max-width:894px;margin-inline:auto">Длительное насыщение, полноценное питание и контроль аппетита</h2>
+
+    <div class="mct">
+      <img class="mct__img" src="../../assets/mct-image.webp" alt="МСТ-масло в составе Кетолоджи" width="640" height="586">
+      <div class="mct__text">
+        <h3 class="h3">МСТ-масло — инновация<br>в похудении</h3>
+        <p class="body mct__lead">Среднецепочечные триглицериды, которые быстро усваиваются организмом и заряжают энергией, обеспечивают пролонгированное чувство сытости без инсулиновых пиков.</p>
+        <ul class="marks">
+          <li>Мгновенная кетогенная энергия (обход лимфы → прямая доставка в печень).</li>
+          <li>Длительное насыщение на 3-4 часа дольше за счет подавления гормона голода&nbsp;- грелина.</li>
+          <li>Высокий термогенный эффект (+15% к сжиганию калорий после приема). Вы сжигаете калории, пока усваиваете пищу.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 class="h2" style="margin-top:41px">Полноценное питание и контроль аппетита</h2>
+
+    <div class="composition">
+      <article class="comp-card">
+        <img class="comp-card__icon" src="../../assets/icon-protein.webp" alt="" width="180" height="180">
+        <h3 class="h5 comp-card__title">Протеиновая<br>растительная матрица<br>из сои, гороха и риса</h3>
+        <ul class="marks marks--deep">
+          <li>Богатый аминокислотный профиль для полноценной замены одного приема пищи</li>
+          <li>Постепенное усвоение без скачков инсулина.</li>
+          <li>Подходит для разных типов питания</li>
+        </ul>
+      </article>
+      <article class="comp-card">
+        <img class="comp-card__icon" src="../../assets/icon-fiber.webp" alt="" width="180" height="180">
+        <h3 class="h5 comp-card__title">Клетчатка:<br>пребиотики — инулин<br>и фруктоолигосахариды</h3>
+        <ul class="marks marks--deep">
+          <li>Нормализация микробиоты кишечника (ключ к усвоению нутриентов).</li>
+          <li>Улучшение липидного профиля и иммунной защиты.</li>
+          <li>Мягкая поддержка пищеварения без скачков сахара.</li>
+        </ul>
+      </article>
+      <article class="comp-card">
+        <img class="comp-card__icon" src="../../assets/icon-vitamins.webp" alt="" width="180" height="180">
+        <h3 class="h5 comp-card__title">Витаминный<br>комплекс</h3>
+        <ul class="marks marks--deep">
+          <li>Поддержка энергетического обмена (В-комплекс).</li>
+          <li>Компенсация дефицитов, характерных для низкоуглеводных диет (витамин D, C).</li>
+          <li>Повышение нутритивной плотности без лишних калорий.</li>
+        </ul>
+      </article>
+    </div>
+
+    <a class="comp-link" href="#">Посмотреть полный состав</a>
+  </section>
+
+  <!-- ── Баланс нутриентов ── -->
+  <section class="shell pad section">
+    <div class="nutri">
+      <span class="nutri__blob" aria-hidden="true"></span>
+      <div class="nutri__inner">
+        <h2 class="nutri__title" style="text-align:left">Баланс нутриентов в каждой порции</h2>
+        <p class="nutri__note">В одной порции (32 г):</p>
+        <div class="nutri__grid">
+          <div class="stat"><span class="stat__v">133,21</span><span class="stat__l">кКал</span></div>
+          <div class="stat"><span class="stat__v">17,26<span>г</span></span><span class="stat__l">белки</span></div>
+          <div class="stat"><span class="stat__v">4,91<span>г</span></span><span class="stat__l">углеводы</span></div>
+          <div class="stat"><span class="stat__v">3,33<span>г</span></span><span class="stat__l">жиры</span></div>
+          <div class="stat"><span class="stat__v">3,33<span>г</span></span><span class="stat__l">пищевые волокна</span></div>
+          <div class="stat"><span class="stat__v">13</span><span class="stat__l">витаминов</span></div>
+        </div>
+      </div>
+      <div class="nutri__media">
+        <img src="../../assets/hero-nutrients.webp" alt="Порция коктейля Кетолоджи" width="923" height="548">
+        <img src="../../assets/shaker.webp" alt="Шейкер Кетолоджи" width="520" height="368">
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Сравнение ── -->
+  <section class="shell pad section">
+    <h2 class="h2">Кетолоджи vs. Обычные диеты</h2>
+    <div class="compare__head">
+      <span></span><span>Кетолоджи</span><span>Обычная диета</span>
+    </div>
+
+    <div class="crow">
+      <div>Длительное чувство сытости</div>
+      <div class="crow__k"><span class="tick" aria-hidden="true"></span><span class="tickv">3–5 часов</span></div>
+      <div class="crow__d">Часто 1–2 часа</div>
+    </div>
+    <div class="crow">
+      <div>Стабильная энергия без резких спадов</div>
+      <div class="crow__k"><span class="tick" aria-label="есть"></span></div>
+      <div class="crow__d">Не всегда</div>
+    </div>
+    <div class="crow">
+      <div>Меньше тяги к сладкому</div>
+      <div class="crow__k"><span class="tick" aria-label="есть"></span></div>
+      <div class="crow__d"><span class="cross" aria-label="нет"></span></div>
+    </div>
+    <div class="crow">
+      <div>Важные нутриенты для организма</div>
+      <div class="crow__k"><span class="tick" aria-label="есть"></span></div>
+      <div class="crow__d">Часто есть дефициты</div>
+    </div>
+    <div class="crow">
+      <div>Легко придерживаться долгое время</div>
+      <div class="crow__k"><span class="tick" aria-label="есть"></span></div>
+      <div class="crow__d"><span class="cross" aria-label="нет"></span></div>
+    </div>
+  </section>
+
+  <!-- ── Задачи ── -->
+  <section class="shell pad section">
+    <h2 class="h2 h2--tight">Один коктейль — разные задачи</h2>
+    <div class="tasks">
+      <article class="task task--tall">
+        <span class="task__blob" aria-hidden="true"></span>
+        <div class="task__txt">
+          <h3 class="h4">Похудение</h3>
+          <p class="task__desc">Контроль калорий, белок + клетчатка для сытости</p>
+        </div>
+        <img class="task__img" src="../../assets/task-weight.webp" alt="" width="409" height="595">
+      </article>
+      <article class="task">
+        <span class="task__blob" aria-hidden="true"></span>
+        <div class="task__txt">
+          <h3 class="h4">Спорт</h3>
+          <p class="task__desc">Белок для мышц + МСТ для энергии</p>
+        </div>
+        <img class="task__img" src="../../assets/task-sport.webp" alt="" width="252" height="293">
+      </article>
+      <article class="task" style="--img:46%">
+        <span class="task__blob" aria-hidden="true"></span>
+        <div class="task__txt">
+          <h3 class="h4">ЗОЖ</h3>
+          <p class="task__desc">Чистый состав,<br>13 витаминов, пребиотики</p>
+        </div>
+        <img class="task__img" src="../../assets/task-zozh-bg.webp" alt="" width="313" height="353">
+      </article>
+      <article class="task">
+        <span class="task__blob" aria-hidden="true"></span>
+        <div class="task__txt">
+          <h3 class="h4">Активное<br>долголетие</h3>
+          <p class="task__desc">Поддержка мышц, костей, иммунитета</p>
+        </div>
+        <img class="task__img" src="../../assets/task-longevity.webp" alt="" width="570" height="570">
+      </article>
+      <article class="task" style="--img:44%">
+        <span class="task__blob" aria-hidden="true"></span>
+        <div class="task__txt">
+          <h3 class="h4">Кетопитание</h3>
+          <p class="task__desc">МСТ, низкое содержание углеводов, без добавленного сахара</p>
+        </div>
+        <img class="task__img" src="../../assets/task-keto.webp" alt="" width="230" height="328">
+      </article>
+    </div>
+  </section>
+
+  <!-- ── Вкусы ── -->
+  <section class="shell pad section" id="flavors">
+    <h2 class="h2 h2--tight" style="color:var(--navy)">Выберите свой вкус</h2>
+    <div class="flavors">
+      <article class="flavor">
+        <img class="flavor__pack" src="../../assets/flavor-vanilla-b.webp" alt="Кетолоджи Ваниль" width="456" height="691">
+        <img class="flavor__badge" src="../../assets/badge-vanilla.webp" alt="" width="26" height="26">
+        <div class="flavor__foot">
+          <div>
+            <h3 class="flavor__name">Ваниль</h3>
+            <p class="flavor__sub">Нежный десерт</p>
+          </div>
+          <a class="btn" href="#">Купить</a>
+        </div>
+      </article>
+      <article class="flavor flavor--grey">
+        <img class="flavor__pack" src="../../assets/flavor-peach.webp" alt="Кетолоджи Персик" width="467" height="687">
+        <img class="flavor__badge" src="../../assets/badge-peach.webp" alt="" width="26" height="26">
+        <div class="flavor__foot">
+          <div>
+            <h3 class="flavor__name">Персик</h3>
+            <p class="flavor__sub">Свежесть и легкость</p>
+          </div>
+          <a class="btn" href="#">Купить</a>
+        </div>
+      </article>
+      <article class="flavor">
+        <img class="flavor__pack" src="../../assets/flavor-choco.webp" alt="Кетолоджи Шоколад" width="462" height="679">
+        <div class="flavor__foot">
+          <div>
+            <h3 class="flavor__name">Шоколад</h3>
+            <p class="flavor__sub">Чистое наслаждение</p>
+          </div>
+          <a class="btn" href="#">Купить</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ── Мировое качество ── -->
+  <section class="shell pad section">
+    <div class="quality">
+      <div class="quality__txt">
+        <h2 class="h2 h2--tight" style="text-align:left">Мировое качество</h2>
+        <p class="body">Формула Кетолоджи создана на пересечении современных подходов к питанию и многолетнего профессионального опыта Keforma (Италия) в разработке нутриентно-насыщенных продуктов.</p>
+      </div>
+      <div class="quality__logos">
+        <img src="../../assets/logo-1.webp" alt="Сертификат качества" width="102" height="68">
+        <img src="../../assets/logo-2.webp" alt="Сертификат качества" width="136" height="44">
+        <img src="../../assets/logo-3.webp" alt="Сертификат качества" width="98" height="99">
+        <img src="../../assets/logo-4.webp" alt="Сертификат качества" width="88" height="88">
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Финальный CTA ── -->
+  <section class="shell pad section">
+    <div class="cta">
+      <img class="cta__img" src="../../assets/cta-image.webp" alt="Коктейль Кетолоджи" width="690" height="617">
+      <div class="cta__card">
+        <h2 class="h1" style="text-align:center">Начните худеть комфортно</h2>
+        <p class="body cta__lead">Без голода, постоянных перекусов и резких скачков энергии.</p>
+        <a class="btn" href="#flavors">Выбрать свой коктейль</a>
+      </div>
+    </div>
+  </section>
+</div>
