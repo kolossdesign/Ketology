@@ -53,6 +53,11 @@ def lang_switcher(current, langs, draft=False):
         '.lp-langbar a.is-active{opacity:1;font-weight:600;border-bottom-color:#EE4729}'
         '.lp-draft{margin-left:auto;background:#EE4729;color:#fff;font-weight:600;'
         'padding:4px 10px;border-radius:4px}'
+        # WHY: шапка и подвал в превью — макет чужого сайта. Клики по ним гасим,
+        # чтобы из превью нельзя было случайно уйти на боевой еком.
+        '.lp-ecom-chrome a,.lp-ecom-chrome button{pointer-events:none;cursor:default}'
+        # промо-подсказка поиска в екоме скрывается его же JS; без Angular она висит развёрнутой
+        '.lp-ecom-chrome .digi-search-highlight{display:none!important}'
         '</style>')
 
 
