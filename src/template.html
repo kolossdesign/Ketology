@@ -109,10 +109,6 @@ h1,h2,h3,p{margin:0}
   color:var(--white);padding:64px 81px;min-height:672px;
   display:grid;grid-template-columns:minmax(0,631px) minmax(0,1fr);gap:40px;align-items:center;
 }
-.nutri__blob{
-  position:absolute;right:-24%;top:-48%;width:1355px;height:1326px;border-radius:50%;
-  background:#FFEE95;opacity:.18;pointer-events:none;
-}
 .nutri__inner{position:relative;z-index:1;display:flex;flex-direction:column;gap:48px}
 .nutri__title{font-size:40px;line-height:48px;font-weight:500;letter-spacing:-1.2px;max-width:373px}
 .nutri__note{font-size:18px;line-height:24px;font-weight:300;margin-bottom:24px}
@@ -154,16 +150,20 @@ h1,h2,h3,p{margin:0}
 .tasks{display:grid;grid-template-columns:468fr 405fr 405fr;grid-template-rows:306px 306px;gap:16px;margin-top:40px}
 .task{position:relative;overflow:hidden;background:var(--beige);border-radius:var(--r-card);padding:32px}
 .task--tall{grid-row:span 2}
+/* Ellipse 115 — светлое пятно под картинкой. Смещения сняты из макета */
 .task__blob{
-  position:absolute;left:50%;bottom:-42%;translate:-50% 0;
+  position:absolute;left:40.2%;top:16.7%;
   width:310px;height:310px;border-radius:50%;background:var(--beige-soft);
 }
-.task--tall .task__blob{width:545px;height:545px;bottom:-30%}
+.task--tall .task__blob{left:13.9%;top:32.3%;width:545px;height:545px}
 .task__txt{position:relative;z-index:2;display:flex;flex-direction:column;gap:12px;max-width:187px}
 .task--tall .task__txt{max-width:436px}
 .task__desc{font-size:16px;line-height:21px;font-weight:300}
-.task__img{position:absolute;z-index:1;right:-8px;bottom:0;width:var(--img,52%);height:auto;object-fit:contain}
-.task--tall .task__img{left:50%;translate:-50% 0;right:auto;width:85%}
+/* WHY: в макете картинка плитки — компонент (woman, image-1…image-4), прижатый
+   к ПРАВОМУ НИЖНЕМУ углу карточки и обрезанный по его рамке. Экспортируем компонент
+   целиком и ставим вплотную к углу; ширина = ширина компонента / ширина карточки. */
+.task__img{position:absolute;z-index:1;right:0;bottom:0;width:54.6%;height:auto;object-fit:contain}
+.task--tall .task__img{width:84.8%}
 
 /* ── block 6 — вкусы ───────────────────────────────────────────────────────── */
 .flavors{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:40px}
@@ -310,7 +310,6 @@ h1,h2,h3,p{margin:0}
   <!-- ── Баланс нутриентов ── -->
   <section class="shell pad section">
     <div class="nutri">
-      <span class="nutri__blob" aria-hidden="true"></span>
       <div class="nutri__inner">
         <h2 class="nutri__title" style="text-align:left">{{nutrients.title_1}}</h2>
         <div>
@@ -376,17 +375,17 @@ h1,h2,h3,p{margin:0}
           <h3 class="h4">{{tasks.title_2}}</h3>
           <p class="task__desc">{{tasks.text_1}}</p>
         </div>
-        <img class="task__img" src="assets/task-weight.webp" alt="" width="424" height="483">
+        <img class="task__img" src="assets/task-weight.webp" alt="" width="397" height="450">
       </article>
-      <article class="task" style="--img:46%">
+      <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
         <div class="task__txt">
           <h3 class="h4">{{tasks.title_3}}</h3>
           <p class="task__desc">{{tasks.text_2}}</p>
         </div>
-        <img class="task__img" src="assets/task-keto.webp" alt="" width="209" height="258">
+        <img class="task__img" src="assets/task-keto.webp" alt="" width="221" height="306">
       </article>
-      <article class="task" style="--img:50%">
+      <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
         <div class="task__txt">
           <h3 class="h4">{{tasks.title_4}}</h3>
@@ -394,21 +393,21 @@ h1,h2,h3,p{margin:0}
         </div>
         <img class="task__img" src="assets/task-zozh.webp" alt="" width="221" height="306">
       </article>
-      <article class="task" style="--img:52%">
+      <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
         <div class="task__txt">
           <h3 class="h4">{{tasks.title_5}}<br>{{tasks.title_6}}</h3>
           <p class="task__desc">{{tasks.text_4}}</p>
         </div>
-        <img class="task__img" src="assets/task-longevity.webp" alt="" width="570" height="570">
+        <img class="task__img" src="assets/task-longevity.webp" alt="" width="221" height="306">
       </article>
-      <article class="task" style="--img:46%">
+      <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
         <div class="task__txt">
           <h3 class="h4">{{tasks.title_7}}</h3>
           <p class="task__desc">{{tasks.text_5}}</p>
         </div>
-        <img class="task__img" src="assets/task-sport.webp" alt="" width="203" height="293">
+        <img class="task__img" src="assets/task-sport.webp" alt="" width="221" height="306">
       </article>
     </div>
   </section>
