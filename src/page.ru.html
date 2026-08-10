@@ -107,9 +107,9 @@ h1,h2,h3,p{margin:0}
   position:relative;overflow:hidden;border-radius:var(--r-card);
   background:linear-gradient(135deg,#D94938 0%,#FF8475 100%);
   color:var(--white);padding:64px 81px;min-height:672px;
-  display:grid;grid-template-columns:minmax(0,631px) minmax(0,1fr);gap:40px;align-items:center;
+  display:flex;align-items:center;
 }
-.nutri__inner{position:relative;z-index:1;display:flex;flex-direction:column;gap:48px}
+.nutri__inner{position:relative;z-index:1;display:flex;flex-direction:column;gap:48px;max-width:631px}
 .nutri__title{font-size:40px;line-height:48px;font-weight:500;letter-spacing:-1.2px;max-width:373px}
 .nutri__note{font-size:18px;line-height:24px;font-weight:300;margin-bottom:24px}
 .nutri__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px 24px;max-width:631px}
@@ -118,8 +118,11 @@ h1,h2,h3,p{margin:0}
 .stat__v span{font-size:32px;line-height:39px;letter-spacing:-.96px}
 .stat__l{font-size:20px;line-height:27px;font-weight:300}
 .nutri__note-small{font-size:16px;line-height:19px;font-weight:300;max-width:439px;opacity:.9}
-.nutri__media{position:relative;z-index:1;align-self:end;justify-self:end}
-.nutri__media img{width:100%;max-width:640px;height:auto;object-fit:contain}
+/* WHY: в макете фрейм protein прижат к правой границе блока и занимает всю его высоту
+   (806..1440 × 2371..3043). Тянем картинку по высоте — ширина следует за пропорцией,
+   поэтому при росте блока (длинные переводы) картинка увеличивается вместе с ним. */
+.nutri__media{position:absolute;z-index:0;right:0;top:0;bottom:0}
+.nutri__media img{height:100%;width:auto;max-width:none;object-fit:contain;object-position:right bottom}
 
 /* ── block 4 — сравнение ───────────────────────────────────────────────────── */
 .compare__head{display:grid;grid-template-columns:608fr 309fr 309fr;gap:12px;margin-top:48px;margin-bottom:12px}
@@ -214,8 +217,10 @@ h1,h2,h3,p{margin:0}
   .mct,.expert{gap:32px}
   .cta__card{padding:56px 40px;min-height:0}
   .quality{grid-template-columns:1fr;gap:40px}
-  .nutri{grid-template-columns:1fr;padding:48px 40px}
-  .nutri__media{justify-self:center}
+  .nutri{flex-direction:column;align-items:stretch;padding:48px 40px}
+  /* на узком экране картинка уходит под текст, иначе она бы легла поверх цифр */
+  .nutri__media{position:static;margin-top:32px}
+  .nutri__media img{height:auto;width:100%;max-width:420px;margin-inline:auto}
   .tasks{grid-template-columns:1fr 1fr;grid-template-rows:none}
   .task--tall{grid-row:span 1;min-height:420px}
   .composition,.flavors{grid-template-columns:1fr;gap:24px}
@@ -326,7 +331,7 @@ h1,h2,h3,p{margin:0}
         <p class="nutri__note-small">КБЖУ у Кетолоджи Персик и Кетолоджи Шоколад может незначительно отличаться от предстравленной. КБЖУ у Кетолоджи Персик и Кетолоджи Шоколад может незначительно отличаться от предстравленной.</p>
       </div>
       <div class="nutri__media">
-        <img src="assets/nutrients-pack.webp" alt="Банка Кетолоджи" width="640" height="694">
+        <img src="assets/nutrients-pack.webp" alt="Банка Кетолоджи" width="640" height="694" loading="lazy">
       </div>
     </div>
   </section>

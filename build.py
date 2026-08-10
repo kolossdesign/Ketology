@@ -58,6 +58,9 @@ def lang_switcher(current, langs, draft=False):
         '.lp-ecom-chrome a,.lp-ecom-chrome button{pointer-events:none;cursor:default}'
         # промо-подсказка поиска в екоме скрывается его же JS; без Angular она висит развёрнутой
         '.lp-ecom-chrome .digi-search-highlight{display:none!important}'
+        # WHY: снимок шапки статичен и на узком экране не перестраивается (её адаптив
+        # делает JS екома). Подрезаем, чтобы мок чужой шапки не тащил страницу вбок.
+        '.lp-ecom-chrome{overflow-x:hidden}'
         '</style>')
 
 
