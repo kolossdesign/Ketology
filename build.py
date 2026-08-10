@@ -21,8 +21,39 @@ PLACEHOLDER = re.compile(r'\{\{([\w.]+)\}\}')
 TODO = 'TODO: '
 
 
+LANG_NAMES = {'ru': 'Русский', 'en': 'English', 'de': 'Deutsch', 'pl': 'Polski'}
+
+
 def load(lang):
     return json.loads((CONTENT / f'{lang}.json').read_text(encoding='utf-8'))
+
+
+def ecom(part):
+    """Шапка/подвал/стили, снятые с ru.siberianhealth.com (см. fetch_ecom.py)."""
+    p = ROOT / 'src' / f'ecom-{part}.html'
+    return p.read_text(encoding='utf-8') if p.exists() else ''
+
+
+def lang_switcher(current, langs, draft=False):
+    """Переключатель языков — только для превью, в еком-фрагмент не попадает."""
+    mark = ('<b class="lp-draft">черновой перевод — заменить на перевод от переводчиков</b>'
+            if draft else '')
+    items = ''.join(
+        f'<a href="../{l}/" class="{"is-active" if l == current else ""}">{LANG_NAMES.get(l, l)}</a>'
+        for l in langs)
+    return (
+        '<div class="lp-langbar">'
+        '<span>Превью лендинга Ketology — язык:</span>' + items + mark +
+        '</div>'
+        '<style>'
+        '.lp-langbar{position:sticky;top:0;z-index:9999;display:flex;gap:14px;align-items:center;'
+        'background:#161616;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:10px 20px}'
+        '.lp-langbar a{color:#fff;opacity:.6;text-decoration:none;border-bottom:1px solid transparent}'
+        '.lp-langbar a:hover{opacity:1}'
+        '.lp-langbar a.is-active{opacity:1;font-weight:600;border-bottom-color:#EE4729}'
+        '.lp-draft{margin-left:auto;background:#EE4729;color:#fff;font-weight:600;'
+        'padding:4px 10px;border-radius:4px}'
+        '</style>')
 
 
 def locales():
@@ -152,22 +183,27 @@ def rebase(html, base):
 def cmd_build(args):
     tpl = TEMPLATE.read_text(encoding='utf-8')
     ref = load('ru')
+    langs = locales()
     ok = True
-    for lang in locales():
+    for lang in langs:
         data = load(lang)
         page, missing = render(tpl, data, lang)
-        extra = sorted(set(data) - set(ref))
+        # WHY: шапка и подвал берутся с ru.siberianhealth.com и живут только в превью.
+        # В еком-фрагмент они не попадают — там их даёт сам сайт.
+        page_std = (page
+                    .replace('<!--ECOM_CSS-->', ecom('css'))
+                    .replace('<!--ECOM_HEADER-->',
+                             lang_switcher(lang, langs, data.get('_draft', False)) + ecom('header'))
+                    .replace('<!--ECOM_FOOTER-->', ecom('footer')))
+        page = re.sub(r'<!--ECOM_(CSS|HEADER|FOOTER)-->', '', page)
+        extra = sorted(k for k in set(data) - set(ref) if not k.startswith('_'))
         todo = sorted(k for k, v in data.items() if isinstance(v, str) and v.startswith(TODO))
         out = DIST / lang
         out.mkdir(parents=True, exist_ok=True)
         # WHY: dist/<lang>/ лежит на два уровня глубже assets/ — без базы пути не разрешатся
         base = args.base or '../../'
-        (out / 'index.html').write_text(rebase(page, base), encoding='utf-8')
+        (out / 'index.html').write_text(rebase(page_std, base), encoding='utf-8')
         (out / 'fragment.html').write_text(rebase(to_fragment(page, lang), base), encoding='utf-8')
-        # WHY: index.html в корне — то, что отдаёт GitHub Pages. Держим его СГЕНЕРИРОВАННЫМ
-        # из шаблона, иначе он разъедется с content/ru.json при первой же правке текста.
-        if lang == 'ru' and not args.base:
-            (ROOT / 'index.html').write_text(page, encoding='utf-8')
         status = 'ok'
         if missing:
             status = f'НЕТ КЛЮЧЕЙ: {len(missing)} ({", ".join(missing[:3])}…)'
@@ -175,6 +211,15 @@ def cmd_build(args):
         elif todo:
             status = f'непереведено: {len(todo)}'
         print(f'  {lang}: {status}{"; лишние ключи: " + ", ".join(extra) if extra else ""}')
+
+    # WHY: страница верхнего уровня — редирект на ru. GitHub Pages статичен,
+    # серверного language negotiation нет, поэтому это meta-refresh.
+    (DIST / 'index.html').write_text(
+        '<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8">'
+        '<meta http-equiv="refresh" content="0; url=ru/">'
+        '<link rel="canonical" href="ru/"><title>Ketology</title></head>'
+        '<body><a href="ru/">Ketology — русская версия</a></body></html>\n',
+        encoding='utf-8')
     return 0 if ok else 1
 
 
@@ -199,11 +244,12 @@ def cmd_check(args):
     for lang in locales():
         data = load(lang)
         miss = sorted(set(ref) - set(data))
-        extra = sorted(set(data) - set(ref))
+        extra = sorted(k for k in set(data) - set(ref) if not k.startswith('_'))
         todo = [k for k, v in data.items() if isinstance(v, str) and v.startswith(TODO)]
         if miss or extra:
             ok = False
-        print(f'  {lang}: строк {len(data)}/{len(ref)}'
+        print(f'  {lang}: строк {len([k for k in data if not k.startswith("_")])}/{len(ref)}'
+              f'{" [черновик]" if data.get("_draft") else ""}'
               f'{", нет: " + ", ".join(miss[:5]) if miss else ""}'
               f'{", лишние: " + ", ".join(extra[:5]) if extra else ""}'
               f'{", TODO: " + str(len(todo)) if todo else ""}')
