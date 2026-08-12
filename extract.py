@@ -15,7 +15,14 @@ SECT_NAMES = {'Hero': 'hero', 'МСТ + состав': 'composition', 'Бала�
               'Экспертный взгляд': 'expert', 'Мировое качество': 'quality',
               'Финальный CTA': 'cta'}
 CYR = re.compile(r'[А-Яа-яЁё]')
+# WHY: числа КБЖУ тоже локализуемы — десятичный разделитель разный (ru/de/pl «17,26»,
+# en «17.26»). Без этого они остались бы зашиты в вёрстку и во всех языках были бы русскими.
+NUM = re.compile(r'^[\d]+(?:[.,]\d+)?$')
 TOKEN = re.compile(r'(<!--.*?-->|<[^>]+>)', re.S)
+
+
+def translatable(t):
+    return bool(CYR.search(t) or NUM.match(t.strip()))
 
 src = SRC.read_text(encoding='utf-8')
 head, body = src.split('<body>', 1)
@@ -65,9 +72,10 @@ for tok in TOKEN.split(body):
             stack.pop()
         out.append(tok)
         continue
-    if tok.strip() and CYR.search(tok):
+    if tok.strip() and translatable(tok):
         tag, attrs = stack[-1] if stack else ('div', '')
-        k = key_for(role_for(tag, attrs))
+        role = 'num' if NUM.match(tok.strip()) else role_for(tag, attrs)
+        k = key_for(role)
         content[k] = tok.strip()
         lead = tok[:len(tok) - len(tok.lstrip())]
         tail = tok[len(tok.rstrip()):]
