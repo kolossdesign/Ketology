@@ -48,6 +48,10 @@ h1,h2,h3,p{margin:0}
 .shell{max-width:var(--shell);margin:0 auto}
 .pad{padding-inline:20px}
 .section{margin-top:96px}
+/* WHY: последний блок вплотную упирался в подвал сайта. Задаём именно на
+   :last-child, а не на <main> — тогда отступ доезжает и до еком-фрагмента,
+   где тега <main> уже нет. */
+.section:last-child{margin-bottom:80px}
 
 .h1{font-size:40px;line-height:45px;font-weight:500;letter-spacing:-1.2px}
 .h2{font-size:40px;line-height:48px;font-weight:500;letter-spacing:-1.2px;text-align:center}
@@ -328,7 +332,7 @@ h1,h2,h3,p{margin:0}
             <div class="stat"><span class="stat__v">13</span><span class="stat__l">витаминов</span></div>
           </div>
         </div>
-        <p class="nutri__note-small">КБЖУ у Кетолоджи Персик и Кетолоджи Шоколад может незначительно отличаться от предстравленной. КБЖУ у Кетолоджи Персик и Кетолоджи Шоколад может незначительно отличаться от предстравленной.</p>
+        <p class="nutri__note-small">КБЖУ у Кетолоджи Персик и Кетолоджи Шоколад может незначительно отличаться от представленной.</p>
       </div>
       <div class="nutri__media">
         <img src="assets/nutrients-pack.webp" alt="Банка Кетолоджи" width="640" height="694" loading="lazy">

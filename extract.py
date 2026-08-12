@@ -85,6 +85,16 @@ for tok in TOKEN.split(body):
 
 body_t = ''.join(out)
 
+# WHY: в макете заголовки разрезаны переносами строки, и экстрактор делал из одного
+# заголовка 2-3 ключа. Переводчик присылает фразу целиком — класть её некуда.
+# Схлопываем такие цепочки в ОДИН ключ, а перенос переносим внутрь значения.
+for chain in re.findall(r'\{\{[\w.]+\}\}(?:\s*<br>\s*\{\{[\w.]+\}\})+', body_t):
+    keys = re.findall(r'\{\{([\w.]+)\}\}', chain)
+    content[keys[0]] = '<br>'.join(content[k] for k in keys)
+    for k in keys[1:]:
+        del content[k]
+    body_t = body_t.replace(chain, '{{' + keys[0] + '}}')
+
 title = re.search(r'<title>(.*?)</title>', head, re.S).group(1).strip()
 desc = re.search(r'<meta name="description" content="([^"]+)"', head).group(1)
 head_t = (head.replace(f'<title>{title}</title>', '<title>{{meta.title}}</title>')

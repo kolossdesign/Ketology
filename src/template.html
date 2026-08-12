@@ -48,6 +48,10 @@ h1,h2,h3,p{margin:0}
 .shell{max-width:var(--shell);margin:0 auto}
 .pad{padding-inline:20px}
 .section{margin-top:96px}
+/* WHY: последний блок вплотную упирался в подвал сайта. Задаём именно на
+   :last-child, а не на <main> — тогда отступ доезжает и до еком-фрагмента,
+   где тега <main> уже нет. */
+.section:last-child{margin-bottom:80px}
 
 .h1{font-size:40px;line-height:45px;font-weight:500;letter-spacing:-1.2px}
 .h2{font-size:40px;line-height:48px;font-weight:500;letter-spacing:-1.2px;text-align:center}
@@ -255,7 +259,7 @@ h1,h2,h3,p{margin:0}
       <div class="hero__card">
         <img class="hero__logo" src="assets/logo-ketology.svg" alt="{{hero.alt_1}}" width="129" height="20">
         <div class="hero__body">
-          <h1 class="h1">{{hero.title_1}}<br>{{hero.title_2}}</h1>
+          <h1 class="h1">{{hero.title_1}}</h1>
           <p class="body hero__lead">{{hero.text_1}}</p>
           <a class="btn" href="#flavors">{{hero.btn_1}}</a>
         </div>
@@ -271,7 +275,7 @@ h1,h2,h3,p{margin:0}
     <div class="mct">
       <img class="mct__img" src="assets/mct-image.webp" alt="{{composition.alt_1}}" width="640" height="586">
       <div class="mct__text">
-        <h3 class="h3">{{composition.title_2}}<br>{{composition.title_3}}</h3>
+        <h3 class="h3">{{composition.title_2}}</h3>
         <p class="body mct__lead">{{composition.text_1}}</p>
         <ul class="marks">
           <li>{{composition.li_1}}</li>
@@ -284,7 +288,7 @@ h1,h2,h3,p{margin:0}
     <div class="composition">
       <article class="comp-card">
         <img class="comp-card__icon" src="assets/icon-protein.webp" alt="" width="180" height="180">
-        <h3 class="h5 comp-card__title">{{composition.title_4}}<br>{{composition.title_5}}<br>{{composition.title_6}}</h3>
+        <h3 class="h5 comp-card__title">{{composition.title_4}}</h3>
         <ul class="marks">
           <li>{{composition.li_4}}</li>
           <li>{{composition.li_5}}</li>
@@ -293,7 +297,7 @@ h1,h2,h3,p{margin:0}
       </article>
       <article class="comp-card">
         <img class="comp-card__icon" src="assets/icon-fiber.webp" alt="" width="180" height="180">
-        <h3 class="h5 comp-card__title">{{composition.title_7}}<br>{{composition.title_8}}<br>{{composition.title_9}}</h3>
+        <h3 class="h5 comp-card__title">{{composition.title_7}}</h3>
         <ul class="marks">
           <li>{{composition.li_7}}</li>
           <li>{{composition.li_8}}</li>
@@ -302,7 +306,7 @@ h1,h2,h3,p{margin:0}
       </article>
       <article class="comp-card">
         <img class="comp-card__icon" src="assets/icon-vitamins.webp" alt="" width="180" height="180">
-        <h3 class="h5 comp-card__title">{{composition.title_10}}<br>{{composition.title_11}}</h3>
+        <h3 class="h5 comp-card__title">{{composition.title_10}}</h3>
         <ul class="marks">
           <li>{{composition.li_10}}</li>
           <li>{{composition.li_11}}</li>
@@ -401,7 +405,7 @@ h1,h2,h3,p{margin:0}
       <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
         <div class="task__txt">
-          <h3 class="h4">{{tasks.title_5}}<br>{{tasks.title_6}}</h3>
+          <h3 class="h4">{{tasks.title_5}}</h3>
           <p class="task__desc">{{tasks.text_4}}</p>
         </div>
         <img class="task__img" src="assets/task-longevity.webp" alt="" width="221" height="306">

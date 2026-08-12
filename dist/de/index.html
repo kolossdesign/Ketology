@@ -53,6 +53,10 @@ h1,h2,h3,p{margin:0}
 .shell{max-width:var(--shell);margin:0 auto}
 .pad{padding-inline:20px}
 .section{margin-top:96px}
+/* WHY: последний блок вплотную упирался в подвал сайта. Задаём именно на
+   :last-child, а не на <main> — тогда отступ доезжает и до еком-фрагмента,
+   где тега <main> уже нет. */
+.section:last-child{margin-bottom:80px}
 
 .h1{font-size:40px;line-height:45px;font-weight:500;letter-spacing:-1.2px}
 .h2{font-size:40px;line-height:48px;font-weight:500;letter-spacing:-1.2px;text-align:center}
@@ -251,7 +255,7 @@ h1,h2,h3,p{margin:0}
 </head>
 <body>
 
-<div class="lp-langbar"><span>Превью лендинга Ketology — язык:</span><a href="../de/" class="is-active">Deutsch</a><a href="../en/" class="">English</a><a href="../pl/" class="">Polski</a><a href="../ru/" class="">Русский</a><b class="lp-draft">черновой перевод — заменить на перевод от переводчиков</b></div><style>.lp-langbar{position:sticky;top:0;z-index:9999;display:flex;gap:14px;align-items:center;background:#161616;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:10px 20px}.lp-langbar a{color:#fff;opacity:.6;text-decoration:none;border-bottom:1px solid transparent}.lp-langbar a:hover{opacity:1}.lp-langbar a.is-active{opacity:1;font-weight:600;border-bottom-color:#EE4729}.lp-draft{margin-left:auto;background:#EE4729;color:#fff;font-weight:600;padding:4px 10px;border-radius:4px}.lp-ecom-chrome a,.lp-ecom-chrome button{pointer-events:none;cursor:default}.lp-ecom-chrome .digi-search-highlight{display:none!important}.lp-ecom-chrome{overflow-x:hidden}</style><div class="lp-ecom-chrome"><header class="im21--header">
+<div class="lp-langbar"><span>Превью лендинга Ketology — язык:</span><a href="../de/" class="is-active">Deutsch</a><a href="../en/" class="">English</a><a href="../fr/" class="">fr</a><a href="../ru/" class="">Русский</a></div><style>.lp-langbar{position:sticky;top:0;z-index:9999;display:flex;gap:14px;align-items:center;background:#161616;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:10px 20px}.lp-langbar a{color:#fff;opacity:.6;text-decoration:none;border-bottom:1px solid transparent}.lp-langbar a:hover{opacity:1}.lp-langbar a.is-active{opacity:1;font-weight:600;border-bottom-color:#EE4729}.lp-draft{margin-left:auto;background:#EE4729;color:#fff;font-weight:600;padding:4px 10px;border-radius:4px}.lp-ecom-chrome a,.lp-ecom-chrome button{pointer-events:none;cursor:default}.lp-ecom-chrome .digi-search-highlight{display:none!important}.lp-ecom-chrome{overflow-x:hidden}</style><div class="lp-ecom-chrome"><header class="im21--header">
             <nav id="navbar-top" class="navbar-top navbar-top_theme_restyled">
 
     <div class="navbar-top__inner">
@@ -5412,8 +5416,8 @@ h1,h2,h3,p{margin:0}
       <div class="hero__card">
         <img class="hero__logo" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/logo-ketology.svg" alt="Ketology" width="129" height="20">
         <div class="hero__body">
-          <h1 class="h1">Aktivieren Sie Ihren Stoffwechsel<br>und nehmen Sie komfortabel ab</h1>
-          <p class="body hero__lead">Vollwertiger Mahlzeitenersatz oder sättigender Snack: veganer Shake mit MCT-Ölen, pflanzlichem Protein, Ballaststoffen und 13&nbsp;Vitaminen</p>
+          <h1 class="h1">Aktivieren Sie Ihren Stoffwechsel und nehmen Sie komfortabel ab</h1>
+          <p class="body hero__lead">Vollwertiger Mahlzeitenersatz oder sättigender Snack: ein veganer Shake mit MCT-Ölen, pflanzlichem Protein, Ballaststoffen und 13 Vitaminen</p>
           <a class="btn" href="#flavors">Mehr erfahren</a>
         </div>
       </div>
@@ -5423,17 +5427,17 @@ h1,h2,h3,p{margin:0}
 
   <!-- ── МСТ + состав ── -->
   <section class="shell pad section">
-    <h2 class="h2 h2--tight" style="max-width:894px;margin-inline:auto">Lang anhaltende Sättigung, ausgewogene Zusammensetzung und Appetitkontrolle</h2>
+    <h2 class="h2 h2--tight" style="max-width:894px;margin-inline:auto">Lang anhaltende Sättigung, eine ausgewogene Zusammensetzung und Appetitkontrolle</h2>
 
     <div class="mct">
       <img class="mct__img" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/mct-image.webp" alt="MCT-Öle in der Ketology-Rezeptur" width="640" height="586">
       <div class="mct__text">
-        <h3 class="h3">MCT-Öle — Fette<br>mit einem einzigartigen Stoffwechselweg</h3>
-        <p class="body mct__lead">Mittelkettige Triglyceride werden schnell aufgenommen und folgen einem besonderen Stoffwechselweg. Anders als die meisten Nahrungsfette gelangen sie rasch in die Leber, wo sie aktiv in den Energiestoffwechsel einbezogen werden.</p>
+        <h3 class="h3">MCT-Öle – Fette mit einem einzigartigen Stoffwechselweg</h3>
+        <p class="body mct__lead">Mittelkettige Triglyceride werden schnell aufgenommen und weisen einen besonderen Stoffwechselweg auf. Anders als die meisten Nahrungsfette gelangen sie schnell zur Leber, wo sie aktiv am Energiestoffwechsel beteiligt sind.</p>
         <ul class="marks">
-          <li>Sofortige ketogene Energie bei eingeschränkter Kohlenhydratzufuhr (Umgehung des Lymphsystems → direkter Transport zur Leber).</li>
-          <li>Lang anhaltendes Sättigungsgefühl durch die Wirkung auf die Mechanismen der Appetitregulation</li>
-          <li>Thermogener Effekt — zusätzlicher Kalorienverbrauch bereits während der Verdauung</li>
+          <li>Schnell verfügbare ketogene Energie bei reduzierter Kohlenhydrataufnahme (Umgehung des Lymphsystems → direkte Aufnahme in die Leber).</li>
+          <li>Lang anhaltendes Sättigungsgefühl durch den Einfluss auf die Mechanismen der Appetitregulation</li>
+          <li>Thermogener Effekt – zusätzlicher Kalorienverbrauch bereits während der Verwertung</li>
         </ul>
       </div>
     </div>
@@ -5441,29 +5445,29 @@ h1,h2,h3,p{margin:0}
     <div class="composition">
       <article class="comp-card">
         <img class="comp-card__icon" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/icon-protein.webp" alt="" width="180" height="180">
-        <h3 class="h5 comp-card__title">Pflanzliche Protein-<br>matrix aus Soja,<br>Erbse und Reis</h3>
+        <h3 class="h5 comp-card__title">Pflanzliche Proteinmatrix aus Soja, Erbse und Reis</h3>
         <ul class="marks">
           <li>Reiches Aminosäureprofil</li>
-          <li>Allmähliche Aufnahme und lang anhaltende Sättigung</li>
-          <li>Für verschiedene Ernährungsformen geeignet</li>
+          <li>Schrittweise Aufnahme und lang anhaltende Sättigung</li>
+          <li>Für verschiedene Ernährungsweisen geeignet</li>
         </ul>
       </article>
       <article class="comp-card">
         <img class="comp-card__icon" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/icon-fiber.webp" alt="" width="180" height="180">
-        <h3 class="h5 comp-card__title">Ballaststoffe:<br>Präbiotika — Inulin<br>und Fructooligosaccharide</h3>
+        <h3 class="h5 comp-card__title">Ballaststoffe: Präbiotika – Inulin und Fructooligosaccharide</h3>
         <ul class="marks">
-          <li>Unterstützung der Darmmikrobiota (Schlüssel zur Nährstoffaufnahme)</li>
+          <li>Unterstützung der Darmmikrobiota (entscheidend für die Nährstoffaufnahme)</li>
           <li>Tragen zur Aufrechterhaltung eines gesunden Lipidprofils bei</li>
           <li>Sanfte Unterstützung der Verdauung</li>
         </ul>
       </article>
       <article class="comp-card">
         <img class="comp-card__icon" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/icon-vitamins.webp" alt="" width="180" height="180">
-        <h3 class="h5 comp-card__title">Vitamin-<br>komplex</h3>
+        <h3 class="h5 comp-card__title">Vitaminkomplex</h3>
         <ul class="marks">
-          <li>Unterstützung des Energiestoffwechsels (B-Komplex).</li>
-          <li>Ausgleich von Vitaminmängeln, die für kohlenhydratarme Ernährung typisch sind (Vitamin D, C).</li>
-          <li>Höhere Nährstoffdichte ohne zusätzliche Kalorien.</li>
+          <li>Unterstützung des Energiestoffwechsels (B-Vitamine).</li>
+          <li>Hilft, einen Mangel an Vitaminen auszugleichen, der bei kohlenhydratarmen Ernährungsweisen häufig auftritt (Vitamin D, C).</li>
+          <li>Erhöht die Nährstoffdichte ohne unnötige Kalorien.</li>
         </ul>
       </article>
     </div>
@@ -5475,9 +5479,9 @@ h1,h2,h3,p{margin:0}
       <div class="nutri__inner">
         <h2 class="nutri__title" style="text-align:left">Ausgewogene Nährstoffe in jeder Portion</h2>
         <div>
-          <p class="nutri__note">Pro Portion Ketology Vanille (32 g):</p>
+          <p class="nutri__note">Eine Portion Ketology Vanille (32 g) enthält:</p>
           <div class="nutri__grid">
-            <div class="stat"><span class="stat__v">17,26<span>g</span></span><span class="stat__l">Eiweiß</span></div>
+            <div class="stat"><span class="stat__v">17,26<span>g</span></span><span class="stat__l">Protein</span></div>
             <div class="stat"><span class="stat__v">133,21</span><span class="stat__l">kcal</span></div>
             <div class="stat"><span class="stat__v">4,91<span>g</span></span><span class="stat__l">Fett</span></div>
             <div class="stat"><span class="stat__v">3,33<span>g</span></span><span class="stat__l">Kohlenhydrate</span></div>
@@ -5485,7 +5489,7 @@ h1,h2,h3,p{margin:0}
             <div class="stat"><span class="stat__v">13</span><span class="stat__l">Vitamine</span></div>
           </div>
         </div>
-        <p class="nutri__note-small">Die Nährwerte von Ketology Pfirsich und Ketology Schokolade können geringfügig von den angegebenen abweichen.</p>
+        <p class="nutri__note-small">Die Kalorien- und Makronährstoffwerte von Ketology Pfirsich und Ketology Schokolade können geringfügig von den angegebenen Werten abweichen.</p>
       </div>
       <div class="nutri__media">
         <img src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/nutrients-pack.webp" alt="Ketology Dose" width="640" height="694" loading="lazy">
@@ -5495,9 +5499,9 @@ h1,h2,h3,p{margin:0}
 
   <!-- ── Сравнение ── -->
   <section class="shell pad section">
-    <h2 class="h2">Ketology vs. kalorienarme Diät</h2>
+    <h2 class="h2">Ketology vs. kalorienarme Ernährung</h2>
     <div class="compare__head">
-      <span></span><span>Ketology</span><span>Kalorienarme Diät</span>
+      <span></span><span>Ketology</span><span>Kalorienarme Ernährung</span>
     </div>
 
     <div class="crow">
@@ -5506,12 +5510,12 @@ h1,h2,h3,p{margin:0}
       <div class="crow__d"><span class="cross" aria-label="nein"></span></div>
     </div>
     <div class="crow">
-      <div>Stabile Energie ohne starke Einbrüche</div>
+      <div>Konstante Energie ohne starke Tiefs</div>
       <div class="crow__k"><span class="tick" aria-label="ja"></span></div>
       <div class="crow__d">Nicht immer</div>
     </div>
     <div class="crow">
-      <div>Weniger Heißhunger auf Süßes</div>
+      <div>Weniger Lust auf Süßes</div>
       <div class="crow__k"><span class="tick" aria-label="ja"></span></div>
       <div class="crow__d"><span class="cross" aria-label="nein"></span></div>
     </div>
@@ -5529,21 +5533,21 @@ h1,h2,h3,p{margin:0}
 
   <!-- ── Задачи ── -->
   <section class="shell pad section">
-    <h2 class="h2 h2--tight">Ein Shake — verschiedene Ziele</h2>
+    <h2 class="h2 h2--tight">Ein Shake – verschiedene Ziele</h2>
     <div class="tasks">
       <article class="task task--tall">
         <span class="task__blob" aria-hidden="true"></span>
         <div class="task__txt">
-          <h3 class="h4">Abnehmen</h3>
-          <p class="task__desc">Kalorienkontrolle, Protein + Ballaststoffe für die Sättigung</p>
+          <h3 class="h4">Gewichtsabnahme</h3>
+          <p class="task__desc">Kalorienkontrolle, Protein + Ballaststoffe für Sättigung</p>
         </div>
         <img class="task__img" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/task-weight.webp" alt="" width="397" height="450">
       </article>
       <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
         <div class="task__txt">
-          <h3 class="h4">Keto-Ernährung</h3>
-          <p class="task__desc">MCT, kohlenhydratarm, ohne Zuckerzusatz</p>
+          <h3 class="h4">Ketogene Ernährung</h3>
+          <p class="task__desc">MCTs, geringer Kohlenhydratgehalt, kein zugesetzter Zucker</p>
         </div>
         <img class="task__img" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/task-keto.webp" alt="" width="221" height="306">
       </article>
@@ -5558,7 +5562,7 @@ h1,h2,h3,p{margin:0}
       <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
         <div class="task__txt">
-          <h3 class="h4">Aktive<br>Langlebigkeit</h3>
+          <h3 class="h4">Aktives Altern</h3>
           <p class="task__desc">Unterstützung von Muskeln, Knochen und Immunsystem</p>
         </div>
         <img class="task__img" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/task-longevity.webp" alt="" width="221" height="306">
@@ -5567,7 +5571,7 @@ h1,h2,h3,p{margin:0}
         <span class="task__blob" aria-hidden="true"></span>
         <div class="task__txt">
           <h3 class="h4">Sport</h3>
-          <p class="task__desc">Protein für die Muskeln + MCT für Energie</p>
+          <p class="task__desc">Protein für die Muskeln + MCTs für Energie</p>
         </div>
         <img class="task__img" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/task-sport.webp" alt="" width="221" height="306">
       </article>
@@ -5593,7 +5597,7 @@ h1,h2,h3,p{margin:0}
         <div class="flavor__foot">
           <div>
             <h3 class="flavor__name">Pfirsich</h3>
-            <p class="flavor__sub">Zarter Sommer</p>
+            <p class="flavor__sub">Sanfter Sommer</p>
           </div>
           <a class="btn" href="#">Kaufen</a>
         </div>
@@ -5617,10 +5621,10 @@ h1,h2,h3,p{margin:0}
     <div class="expert">
       <img class="expert__img" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/expert-photo.webp" alt="Elena Orlova" width="640" height="567">
       <div class="expert__body">
-        <blockquote class="expert__quote">Wenn sich eine Frau auf eine Schwangerschaft vorbereitet oder sich nach der Geburt erholt, sehen wir häufig ähnliche Probleme: Eisenmangel und seine Folgen, unzureichende Zufuhr und Aufnahme von Eiweiß sowie ein Mangel an Vitaminen für die Blutbildung. Ketology ist eine ausgezeichnete Möglichkeit, die zusätzliche Eiweißzufuhr mit einem vollständigen Aminosäurenprofil wirksam abzudecken und zugleich eine zusätzliche Quelle für B-Vitamine zur Vorbeugung eines Mangels bereitzustellen.</blockquote>
+        <blockquote class="expert__quote">Wenn sich eine Frau auf eine Schwangerschaft vorbereitet oder sich nach der Geburt erholt, beobachten wir häufig ähnliche Herausforderungen: Eisenmangel und seine Folgen, eine unzureichende Aufnahme und Verwertung von Protein sowie Vitaminmängel, die eine gesunde Blutbildung beeinträchtigen können. Ketology ist eine hervorragende Möglichkeit, die Proteinzufuhr mit einem vollständigen Aminosäureprofil zu erhöhen und gleichzeitig eine zusätzliche Quelle für B-Vitamine bereitzustellen, um einem Mangel vorzubeugen.</blockquote>
         <div>
           <p class="expert__name">Elena Orlova</p>
-          <p class="expert__role">Biologin, klinische Ernährungsberaterin und Kräuterkundlerin, Spezialistin für integrative Frauengesundheit</p>
+          <p class="expert__role">Biologin, klinische Ernährungsberaterin und Herbalistin, Spezialistin für integrative Frauengesundheit</p>
         </div>
       </div>
     </div>
@@ -5630,8 +5634,8 @@ h1,h2,h3,p{margin:0}
   <section class="shell pad section">
     <div class="quality">
       <div class="quality__txt">
-        <h2 class="h2 h2--tight" style="text-align:left">Weltklasse-Qualität</h2>
-        <p class="body">Die Ketology-Rezeptur entstand an der Schnittstelle moderner Ernährungsansätze und der langjährigen professionellen Erfahrung von Keforma (Italien) in der Entwicklung nährstoffreicher Produkte.</p>
+        <h2 class="h2 h2--tight" style="text-align:left">Weltweite Qualität</h2>
+        <p class="body">Die Ketology-Formel verbindet moderne Ernährungsansätze mit der langjährigen Erfahrung von Keforma (Italien) in der Entwicklung nährstoffreicher Produkte.</p>
       </div>
       <div class="quality__logos">
         <img src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/logo-1.webp" alt="Qualitätszertifikat" width="102" height="68">
@@ -5647,9 +5651,9 @@ h1,h2,h3,p{margin:0}
     <div class="cta">
       <img class="cta__img" src="https://kolossdesign.github.io/sw-prototypes/ketology/assets/cta-image.webp" alt="Ketology Shake" width="690" height="617">
       <div class="cta__card">
-        <h2 class="h1" style="text-align:center">Beginnen Sie komfortabel abzunehmen</h2>
-        <p class="body cta__lead">Ohne Hunger, ständiges Snacken und starke Energieschwankungen.</p>
-        <a class="btn" href="#flavors">Shake auswählen</a>
+        <h2 class="h1" style="text-align:center">Beginnen Sie, komfortabel abzunehmen</h2>
+        <p class="body cta__lead">Ohne Hunger, ständiges Snacken oder starke Energieschwankungen.</p>
+        <a class="btn" href="#flavors">Wählen Sie Ihren Shake</a>
       </div>
     </div>
   </section>
