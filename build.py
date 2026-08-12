@@ -6,6 +6,7 @@
                                              — абсолютные пути к ассетам (для екома)
   python3 build.py new en                    — завести новую локаль из ru.json
   python3 build.py check                     — проверить локали без сборки
+  python3 build.py find "кусок текста"        — найти ключ и все его переводы
 
 На каждую локаль получается два файла:
   dist/<lang>/index.html     — самостоятельная страница (для превью и GitHub Pages)
@@ -246,6 +247,40 @@ def cmd_new(args):
     return 0
 
 
+def cmd_find(args):
+    """Ищет строку по всем локалям и показывает ключ + где именно его править."""
+    needle = args.text.lower()
+    langs = locales()
+    data = {l: load(l) for l in langs}
+    hits = [k for k, v in data['ru'].items()
+            if isinstance(v, str) and needle in v.lower()]
+    # ищем и по другим языкам — вдруг искали по английскому тексту
+    for l in langs:
+        for k, v in data[l].items():
+            if isinstance(v, str) and needle in v.lower() and k not in hits and not k.startswith('_'):
+                hits.append(k)
+    if not hits:
+        print(f'не нашёл «{args.text}» ни в одной локали')
+        return 1
+
+    for k in hits:
+        print(f'\n\033[1m{k}\033[0m')
+        for l in langs:
+            val = data[l].get(k, '—')
+            line = line_of(l, k)
+            print(f'  content/{l}.json:{line:<4} {val}')
+    print(f'\nнайдено ключей: {len(hits)}. Поменяй значение в каждом языке, потом: python3 build.py build')
+    return 0
+
+
+def line_of(lang, key):
+    """Номер строки ключа в JSON-файле — чтобы прыгнуть туда редактором."""
+    for i, ln in enumerate((CONTENT / f'{lang}.json').read_text(encoding='utf-8').splitlines(), 1):
+        if ln.lstrip().startswith(f'"{key}"'):
+            return i
+    return 0
+
+
 def cmd_check(args):
     ref = load('ru')
     ok = True
@@ -269,5 +304,6 @@ sub = p.add_subparsers(dest='cmd', required=True)
 b = sub.add_parser('build'); b.add_argument('--base', default=''); b.set_defaults(fn=cmd_build)
 n = sub.add_parser('new'); n.add_argument('lang'); n.set_defaults(fn=cmd_new)
 c = sub.add_parser('check'); c.set_defaults(fn=cmd_check)
+f = sub.add_parser('find'); f.add_argument('text'); f.set_defaults(fn=cmd_find)
 a = p.parse_args()
 sys.exit(a.fn(a))

@@ -33,6 +33,7 @@ dist/<lang>/fragment.html СГЕНЕРИРОВАН. Это вставляетс�
 python3 build.py build     # собрать все локали из content/*.json
 python3 build.py new de    # завести новый язык (копия ru с пометками TODO)
 python3 build.py check     # что не переведено, где не хватает ключей
+python3 build.py find "…"  # найти ключ по тексту во всех языках
 ```
 
 Сборка для екома — с абсолютными путями к ассетам:
@@ -43,13 +44,29 @@ python3 build.py build --base https://cdn.siberianhealth.com/ketology/
 
 ## Как править тексты
 
-1. Открыть `content/ru.json`, найти ключ, поменять значение.
-2. `python3 build.py build`
-3. Закоммитить.
+Единого файла «на все языки» нет: у каждого языка свой JSON. Общий у них — КЛЮЧ.
+Поэтому порядок такой: найти ключ по тексту, потом поменять значение в нужных языках.
+
+```bash
+python3 build.py find "Начните худеть"
+```
+```
+cta.title_1
+  content/de.json:105  Beginnen Sie komfortabel abzunehmen
+  content/en.json:105  Start losing weight comfortably
+  content/pl.json:105  Zacznij chudnąć komfortowo
+  content/ru.json:105  Начните худеть комфортно
+```
+
+Команда показывает ключ, все четыре перевода и номер строки в каждом файле.
+Искать можно по любому языку — по русскому, по английскому, по куску фразы.
+
+Дальше: открыть нужные файлы на этих строках, поменять значение справа от двоеточия,
+затем `python3 build.py build`.
 
 Ключи говорящие: `hero.title_1`, `compare.text_3`, `flavors.btn_2`, `cta.text_1`.
-Секции: `meta`, `page`, `hero`, `composition`, `nutrients`, `compare`, `tasks`,
-`flavors`, `quality`, `cta`.
+Секции: `meta`, `hero`, `composition`, `nutrients`, `compare`, `tasks`,
+`flavors`, `expert`, `quality`, `cta`.
 
 ## Как добавить язык
 
