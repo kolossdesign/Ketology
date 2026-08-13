@@ -371,14 +371,18 @@ JS = r'''
 
   function gh(tok, method, repo, path, body) {
     var url = 'https://api.github.com/repos/' + repo + '/contents/' + path;
-    var opt = {method: method, headers: {Authorization: 'token ' + tok,
-               Accept: 'application/vnd.github+json'}};
+    // WHY: cache:'no-store' обязателен. Браузер отдавал закэшированный ответ
+    // со старой версией файла, GitHub отвечал «does not match <sha>»
+    // и сохранение падало на втором заходе.
+    var opt = {method: method, cache: 'no-store',
+               headers: {Authorization: 'token ' + tok,
+                         Accept: 'application/vnd.github+json'}};
     if (body) { opt.body = JSON.stringify(body); }
     return fetch(url, opt);
   }
 
   function shaOf(tok, repo, path) {
-    return gh(tok, 'GET', repo, path + '?ref=HEAD')
+    return gh(tok, 'GET', repo, path + '?ref=HEAD&t=' + Date.now())
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) { return j && j.sha; })
       .catch(function () { return null; });
@@ -389,12 +393,20 @@ JS = r'''
       .reduce(function (a, c) { return a + String.fromCharCode(c); }, ''));
   }
 
-  function writeFile(tok, repo, path, text, msg) {
+  function writeFile(tok, repo, path, text, msg, retry) {
     return shaOf(tok, repo, path).then(function (sha) {
       var body = {message: msg, content: b64(text)};
       if (sha) body.sha = sha;
       return gh(tok, 'PUT', repo, path, body).then(function (r) {
-        if (!r.ok) return r.text().then(function (t) { throw new Error(path + ': ' + t.slice(0, 120)); });
+        if (r.ok) return;
+        return r.text().then(function (t) {
+          // WHY: файл успели поменять между чтением версии и записью —
+          // перечитываем и пробуем ещё раз, вместо ошибки в лицо человеку.
+          if (!retry && (r.status === 409 || t.indexOf('does not match') > -1)) {
+            return writeFile(tok, repo, path, text, msg, true);
+          }
+          throw new Error(path + ': ' + t.slice(0, 120));
+        });
       });
     });
   }
@@ -474,6 +486,8 @@ JS = r'''
             REPOS[0].repo + '.', true);
       } else if (m.indexOf('not accessible') > -1 || m.indexOf('403') > -1) {
         say('У токена нет права записи. Нужно Permissions → Contents: Read and write.', true);
+      } else if (m.indexOf('does not match') > -1 || m.indexOf('409') > -1) {
+        say('Файл успели изменить с другой стороны. Нажмите «Сохранить» ещё раз.', true);
       } else {
         say('Не сохранилось: ' + m.slice(0, 120), true);
       }
