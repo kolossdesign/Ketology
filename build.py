@@ -219,7 +219,16 @@ def cmd_build(args):
         out.mkdir(parents=True, exist_ok=True)
         # WHY: dist/<lang>/ лежит на два уровня глубже assets/ — без базы пути не разрешатся
         base = args.base or '../../'
-        (out / 'index.html').write_text(rebase(page_std, base), encoding='utf-8')
+        # WHY: превью рендерим тем же способом, что редактор (с метками data-k),
+        # чтобы оно показывало ещё не выгруженные правки. Во фрагмент для екома
+        # это не попадает — он собирается из чистого page.
+        view = editor.render_editable(tpl, data, lang)
+        view = (view.replace('<!--ECOM_CSS-->', ecom('css'))
+                    .replace('<!--ECOM_HEADER-->',
+                             lang_switcher(lang, langs, data.get('_draft', False)) + ecom('header'))
+                    .replace('<!--ECOM_FOOTER-->', ecom('footer')))
+        (out / 'index.html').write_text(
+            rebase(editor.build_view_page(view, lang, data), base), encoding='utf-8')
         (out / 'fragment.html').write_text(rebase(to_fragment(page, lang), base), encoding='utf-8')
 
         # WHY: редактор — отдельная страница, чтобы боевой index.html оставался чистым:

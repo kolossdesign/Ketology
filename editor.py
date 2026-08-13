@@ -28,6 +28,11 @@ def in_markup_context(html, pos):
 
 def render_editable(tpl, data, lang):
     """Как обычный рендер, но видимый текст оборачивается в <x-t data-k>."""
+    # WHY: alt и aria-label — атрибуты, обернуть их тегом нельзя. Помечаем сам элемент,
+    # чтобы скрипт превью знал, какой ключ куда подставлять.
+    tpl = re.sub(r'(alt|aria-label)="\{\{([\w.]+)\}\}"',
+                 lambda m: f'{m.group(1)}="{{{{{m.group(2)}}}}}" data-k-{m.group(1)}="{m.group(2)}"',
+                 tpl)
     out, last = [], 0
     for m in PLACEHOLDER.finditer(tpl):
         key = m.group(1)
@@ -206,6 +211,84 @@ JS = '''
   mark();
 })();
 '''
+
+
+# ── Обычное превью: показывает те же правки, только редактировать нельзя ──────
+VIEW_CSS = '''
+x-t{display:inline;font:inherit;color:inherit;letter-spacing:inherit}
+#lp-draftbar{position:sticky;top:0;z-index:9998;display:flex;gap:12px;align-items:center;
+  background:#FFD600;color:#161616;font:14px/1.4 system-ui,sans-serif;padding:8px 20px}
+#lp-draftbar b{font-weight:600}
+#lp-draftbar .sp{margin-left:auto}
+#lp-draftbar button,#lp-draftbar a{font:inherit;padding:5px 12px;border-radius:6px;
+  border:1px solid rgba(0,0,0,.25);background:rgba(0,0,0,.06);color:#161616;
+  cursor:pointer;text-decoration:none}
+#lp-draftbar button:hover,#lp-draftbar a:hover{background:rgba(0,0,0,.12)}
+'''
+
+VIEW_JS = '''
+(function () {
+  // WHY: правки живут в localStorage, а index.html — статический файл. Без этого
+  // человек правит текст, возвращается в просмотр и видит старую версию.
+  var lang = document.documentElement.lang || 'ru';
+  var STORE = 'ketology-edit-' + lang;
+  var saved;
+  try { saved = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { return; }
+  if (!saved) return;
+
+  // WHY: редактор хранит неразрывный пробел символом, а в разметке он сущностью
+  // &nbsp; — без нормализации такой блок каждый раз считался бы «изменённым».
+  function norm(s) { return String(s).replace(/&nbsp;/g, '\u00a0'); }
+
+  var applied = 0;
+  document.querySelectorAll('x-t[data-k]').forEach(function (n) {
+    var v = saved[n.dataset.k];
+    if (v == null) return;
+    if (norm(v) !== norm(n.innerHTML)) applied++;
+    n.innerHTML = v;
+  });
+  document.querySelectorAll('[alt],[aria-label]').forEach(function (n) {
+    ['alt', 'aria-label'].forEach(function (a) {
+      var k = n.getAttribute('data-k-' + a);
+      if (k && saved[k] != null) n.setAttribute(a, saved[k]);
+    });
+  });
+  if (saved['meta.title']) document.title = saved['meta.title'];
+
+  var bar = document.createElement('div');
+  bar.id = 'lp-draftbar';
+  bar.innerHTML = '<b>Показаны ваши правки</b><span>изменено блоков: ' + applied + '</span>' +
+    '<span class="sp"></span><a href="edit.html">✏ Продолжить редактирование</a>' +
+    '<button data-act="dl">Скачать ' + lang + '.json</button>' +
+    '<button data-act="off">Показать исходный текст</button>';
+  document.body.insertBefore(bar, document.body.firstChild);
+
+  bar.addEventListener('click', function (e) {
+    var act = e.target.dataset.act;
+    if (act === 'off') { location.search = '?original=1'; }
+    if (act === 'dl') {
+      var out = {};
+      ORDER.forEach(function (k) { out[k] = (saved[k] != null ? saved[k] : BASE[k]); });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2) + '\\n'],
+                                            {type: 'application/json'}));
+      a.download = lang + '.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+  });
+})();
+'''
+
+
+def build_view_page(page_html, lang, data):
+    """Обычное превью, которое подхватывает несохранённые правки из редактора."""
+    head = (f'var ORDER = {json.dumps(list(data), ensure_ascii=False)};\n'
+            f'var BASE = {json.dumps(data, ensure_ascii=False)};\n')
+    guard = ("if (new URLSearchParams(location.search).get('original') !== '1') {"
+             + VIEW_JS + "}")
+    inject = f'<style>{VIEW_CSS}</style><script>{head}{guard}</script>'
+    return page_html.replace('</body>', inject + '\n</body>')
 
 
 def build_edit_page(page_html, lang, data, tpl):
