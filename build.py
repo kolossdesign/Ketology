@@ -27,9 +27,9 @@ TODO = 'TODO: '
 
 LANG_NAMES = {'ru': 'Русский', 'en': 'English', 'de': 'Deutsch',
               'fr': 'Français', 'pl': 'Polski'}
-# куда редактор пишет правки: исходный репозиторий и тот, что отдаёт GitHub Pages
-REPOS = [{'repo': 'kolossdesign/Ketology', 'dir': 'content/'},
-         {'repo': 'kolossdesign/sw-prototypes', 'dir': 'ketology/content/'}]
+# WHY: один репозиторий. Он же исходники, он же публикация — GitHub Actions
+# пересобирает сайт сам. Токену в браузере нужен доступ ровно к нему одному.
+REPOS = [{'repo': 'kolossdesign/Ketology', 'dir': 'content/'}]
 
 _names_file = pathlib.Path(__file__).parent / 'content' / 'languages.json'
 if _names_file.exists():
