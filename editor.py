@@ -89,6 +89,11 @@ x-t:focus{outline:none}
 #lp-hidden span{opacity:.6;font-family:ui-monospace,monospace;font-size:12px}
 #lp-hidden input{font:inherit;padding:6px 10px;border-radius:6px;border:1px solid #444;
   background:#111;color:#fff}
+.lp-add label{display:inline-flex;align-items:center;gap:8px;opacity:.85}
+.lp-add input{font:inherit;padding:6px 10px;border-radius:6px;border:1px solid #444;
+  background:#111;color:#fff}
+.lp-hint{opacity:.6;font-size:13px}
+.lp-status{font-weight:600}
 body{padding-bottom:110px}
 '''
 
@@ -112,11 +117,21 @@ JS = r'''
     return !!state.dirty && !!(Object.keys(state.locales).length || state.removed.length);
   }
 
+  var changedCount = 0;
+
   function updateStatus() {
     var el = bar && bar.querySelector('.lp-status');
     if (!el) return;
-    el.textContent = pending() ? '● есть несохранённые правки' : '✓ всё сохранено в проект';
-    el.style.color = pending() ? '#FFD600' : '#8ede9a';
+    // WHY: статус ровно один. Сколько блоков затронуто — уточнение в скобках,
+    // а не второй индикатор рядом.
+    if (pending()) {
+      el.textContent = '● есть несохранённые изменения' +
+        (changedCount ? ' (' + changedCount + ')' : '');
+      el.style.color = '#FFD600';
+    } else {
+      el.textContent = '✓ изменения сохранены';
+      el.style.color = '#8ede9a';
+    }
   }
 
   // WHY: главный риск — закрыть вкладку и потерять работу. Браузер переспросит.
@@ -152,17 +167,26 @@ JS = r'''
     save();
   }
 
+  function baseOf(code) {
+    // WHY: у языка, добавленного в браузере, нет опубликованной версии. Считаем
+    // изменения относительно того языка, с которого его скопировали, иначе
+    // счётчик сразу показывает «изменено 80» на пустом месте.
+    if (LOCALES[code]) return LOCALES[code];
+    var src = (state.locales[code] || {}).from;
+    return (src && LOCALES[src]) || {};
+  }
+
   function markAll() {
     // WHY: изменённый блок НЕ подсвечиваем — после снятия фокуса он должен
     // выглядеть ровно так же, как на боевой странице. Счёт ведём в панели.
-    var base = LOCALES[current] || {}, cnt = 0;
+    var base = baseOf(current), cnt = 0;
     document.querySelectorAll('x-t[data-k]').forEach(function (n) {
       var was = String(base[n.dataset.k] == null ? '' : base[n.dataset.k]).replace(/&nbsp;/g, ' ');
       var now = clean(n.innerHTML).replace(/&nbsp;/g, ' ');
       if (now !== was) cnt++;
     });
-    var el = bar.querySelector('.lp-count');
-    if (el) el.textContent = cnt ? 'изменено блоков: ' + cnt : 'изменений нет';
+    changedCount = cnt;
+    updateStatus();
   }
 
   function apply(code) {
@@ -348,14 +372,23 @@ JS = r'''
   bar.id = 'lp-bar';
   bar.innerHTML =
     '<div class="lp-row lp-langs"></div>' +
+    '<div class="lp-row lp-add" hidden>' +
+      '<label>Название языка <input class="lp-name" placeholder="Italiano" size="18"></label>' +
+      '<label>Код <input class="lp-code" placeholder="it" size="4" maxlength="2"></label>' +
+      '<button data-act="add-ok" class="primary">Добавить</button>' +
+      '<button data-act="add-no">Отмена</button>' +
+      '<span class="lp-hint">Код из двух латинских букв — он станет адресом ' +
+      'страницы и атрибутом языка.</span>' +
+    '</div>' +
     '<div class="lp-row">' +
-      '<span class="lp-count">изменений нет</span>' +
-      '<span class="lp-status"></span><span class="sp"></span>' +
-      '<button data-act="hidden">Скрытые строки (' + HIDDEN.length + ')</button>' +
-      '<button data-act="one">Скачать текущий язык</button>' +
-      '<button data-act="all">Скачать все языки</button>' +
+      '<span class="lp-status"></span>' +
       '<button data-act="publish" class="primary">Сохранить в проект</button>' +
       '<button data-act="reset">Сбросить правки</button>' +
+      '<span class="sp"></span>' +
+      '<button data-act="hidden" title="Заголовок для поисковика, описание ' +
+      'и подписи картинок — на странице их не видно">Тексты для поиска (' + HIDDEN.length + ')</button>' +
+      '<button data-act="one">Скачать язык</button>' +
+      '<button data-act="all">Скачать все</button>' +
     '</div><div id="lp-hidden" hidden></div>';
   document.body.appendChild(bar);
   hiddenBox = bar.querySelector('#lp-hidden');
@@ -372,17 +405,33 @@ JS = r'''
       return apply(c === current ? Object.keys(names())[0] : current);
     }
     if (act === 'add') {
-      var code = (prompt('Код языка из двух букв, например it или es:') || '').trim().toLowerCase();
-      if (!/^[a-z]{2}$/.test(code)) { if (code) alert('Нужны ровно две латинские буквы.'); return; }
-      if (names()[code]) { alert('Такой язык уже есть.'); return; }
-      var title = (prompt('Название языка для переключателя:', code.toUpperCase()) || code).trim();
+      var box = bar.querySelector('.lp-add');
+      box.hidden = false;
+      box.querySelector('.lp-name').value = '';
+      box.querySelector('.lp-code').value = '';
+      box.querySelector('.lp-name').focus();
+      return;
+    }
+    if (act === 'add-no') { bar.querySelector('.lp-add').hidden = true; return; }
+    if (act === 'add-ok') {
+      var box2 = bar.querySelector('.lp-add');
+      var title = box2.querySelector('.lp-name').value.trim();
+      var code = box2.querySelector('.lp-code').value.trim().toLowerCase();
+      var hint = box2.querySelector('.lp-hint');
+      if (!title) { hint.textContent = 'Впишите название языка.'; hint.style.color = '#ff8f78'; return; }
+      if (!/^[a-z]{2}$/.test(code)) {
+        hint.textContent = 'Код — ровно две латинские буквы: it, es, pt.';
+        hint.style.color = '#ff8f78';
+        return;
+      }
+      if (names()[code]) { hint.textContent = 'Язык с кодом ' + code + ' уже есть.';
+                           hint.style.color = '#ff8f78'; return; }
       var from = current;
       state.removed = state.removed.filter(function (x) { return x !== code; });
-      state.locales[code] = {name: title, data: dataOf(from)};
+      state.locales[code] = {name: title, from: from, data: dataOf(from)};
       save();
+      box2.hidden = true;
       apply(code);
-      alert('Язык «' + title + '» добавлен как копия «' + (names()[from] || from) +
-            '». Правьте текст на странице, потом «Скачать все языки».');
       return;
     }
     if (act === 'hidden') { hiddenBox.hidden = !hiddenBox.hidden; return; }

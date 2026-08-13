@@ -46,33 +46,23 @@ def ecom(part):
     return p.read_text(encoding='utf-8') if p.exists() else ''
 
 
-def lang_switcher(current, langs, draft=False):
-    """Переключатель языков — только для превью, в еком-фрагмент не попадает."""
-    mark = ('<b class="lp-draft">черновой перевод — заменить на перевод от переводчиков</b>'
-            if draft else '')
+def preview_styles():
+    """Стили для мока чужой шапки. Своей полосы у превью больше нет —
+    язык и всё остальное живут в панели редактора снизу."""
     return (
-        '<div class="lp-langbar">'
-        '<span>Превью лендинга Ketology</span>' + mark +
-        '</div>'
         '<style>'
-        '.lp-langbar{position:sticky;top:0;z-index:9999;display:flex;gap:14px;align-items:center;'
-        'background:#161616;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:10px 20px}'
-        '.lp-draft{margin-left:auto;background:#EE4729;color:#fff;font-weight:600;'
-        'padding:4px 10px;border-radius:4px}'
-        # WHY: шапка и подвал в превью — макет чужого сайта. Клики по ним гасим,
+        # WHY: шапка и подвал в превью — макет чужого сайта. Клики гасим,
         # чтобы из превью нельзя было случайно уйти на боевой еком.
         '.lp-ecom-chrome a,.lp-ecom-chrome button{pointer-events:none;cursor:default}'
-        # промо-подсказка поиска в екоме скрывается его же JS; без Angular она висит развёрнутой
+        # промо-подсказка поиска скрывается его же JS; без Angular она висит развёрнутой
         '.lp-ecom-chrome .digi-search-highlight{display:none!important}'
-        # WHY: снимок шапки статичен и на узком экране не перестраивается (её адаптив
-        # делает JS екома). Подрезаем, чтобы мок чужой шапки не тащил страницу вбок.
+        # снимок шапки статичен и на узком экране не перестраивается
         '.lp-ecom-chrome{overflow-x:hidden}'
         '</style>')
 
 
 # WHY: languages.json — манифест названий языков, а не локаль. Лежит в той же
-# папке, поэтому его надо исключать явно, иначе в переключателе появляется
-# язык «LANGUAGES», а его файл ещё и грузится дважды.
+# папке, поэтому исключаем явно: иначе в переключателе появляется «LANGUAGES».
 SERVICE_FILES = {'languages'}
 
 
@@ -214,8 +204,7 @@ def cmd_build(args):
         # В еком-фрагмент они не попадают — там их даёт сам сайт.
         page_std = (page
                     .replace('<!--ECOM_CSS-->', ecom('css'))
-                    .replace('<!--ECOM_HEADER-->',
-                             lang_switcher(lang, langs, data.get('_draft', False)) + ecom('header'))
+                    .replace('<!--ECOM_HEADER-->', preview_styles() + ecom('header'))
                     .replace('<!--ECOM_FOOTER-->', ecom('footer')))
         page = re.sub(r'<!--ECOM_(CSS|HEADER|FOOTER)-->', '', page)
         extra = sorted(k for k in set(data) - set(ref) if not k.startswith('_'))
@@ -228,8 +217,7 @@ def cmd_build(args):
         # режима нет. Во фрагмент для екома ничего из этого не попадает.
         view = editor.render_editable(tpl, data, lang)
         view = (view.replace('<!--ECOM_CSS-->', ecom('css'))
-                    .replace('<!--ECOM_HEADER-->',
-                             lang_switcher(lang, langs, data.get('_draft', False)) + ecom('header'))
+                    .replace('<!--ECOM_HEADER-->', preview_styles() + ecom('header'))
                     .replace('<!--ECOM_FOOTER-->', ecom('footer')))
         (out / 'index.html').write_text(
             rebase(editor.build_page(view, lang, data, tpl, all_data, LANG_NAMES, REPOS), base),
