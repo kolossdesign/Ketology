@@ -73,7 +73,9 @@ x-t:focus{outline:none}
 #lp-bar .sp{margin-left:auto}
 #lp-bar button{font:inherit;padding:6px 12px;border-radius:6px;border:1px solid #555;
   background:#2a2a2a;color:#fff;cursor:pointer}
-#lp-bar button:hover{background:#3a3a3a}
+#lp-bar button:hover:not(:disabled){background:#3a3a3a}
+#lp-bar button:disabled{opacity:.35;cursor:default}
+#lp-bar .primary:disabled{background:#EE4729}
 #lp-bar .primary{background:#EE4729;border-color:#EE4729;font-weight:600}
 #lp-bar .primary:hover{background:#D23A00}
 .lp-lang{display:inline-flex;align-items:center;border:1px solid #555;border-radius:6px;
@@ -121,7 +123,14 @@ JS = r'''
   function updateStatus() {
     var el = bar && bar.querySelector('.lp-status');
     if (!el) return;
-    if (!pending()) {
+    // WHY: сохранять и сбрасывать нечего, пока нет изменений — гасим кнопки,
+    // чтобы не гадать, сработало или нет.
+    var has = pending();
+    ['publish', 'reset'].forEach(function (a) {
+      var btn = bar.querySelector('[data-act="' + a + '"]');
+      if (btn && btn.textContent.indexOf('Сохраня') === -1) btn.disabled = !has;
+    });
+    if (!has) {
       el.textContent = '✓ изменения сохранены';
       el.style.color = '#8ede9a';
       return;
@@ -448,11 +457,13 @@ JS = r'''
       state.removed = [];
       localStorage.setItem(STORE, JSON.stringify(state));
       btn.textContent = 'Сохранено ✓';
-      updateStatus();
-      setTimeout(function () { btn.textContent = label; btn.disabled = false; }, 2000);
+      // WHY: возвращаем подпись, а состояние кнопки отдаём updateStatus —
+      // иначе она включалась обратно, хотя сохранять уже нечего.
+      setTimeout(function () { btn.textContent = label; updateStatus(); }, 2000);
     }).catch(function (err) {
       btn.textContent = label;
       btn.disabled = false;
+      setTimeout(updateStatus, 6100);
       var m = String(err.message || err);
       if (m.indexOf('Bad credentials') > -1 || m.indexOf('401') > -1) {
         localStorage.removeItem('ketology-gh-token');
