@@ -78,9 +78,13 @@ x-t:focus{outline:none}
 #lp-bar .primary:hover{background:#D23A00}
 .lp-lang{display:inline-flex;align-items:center;border:1px solid #555;border-radius:6px;
   overflow:hidden}
-.lp-lang button{border:0;border-radius:0;padding:6px 12px;background:#2a2a2a}
-.lp-lang button.on{background:#EE4729;font-weight:600}
+#lp-bar .lp-lang button{border:0;border-radius:0;padding:6px 12px;background:#2a2a2a}
+/* WHY: селектор с id (#lp-bar button) перебивал прежнее правило по
+   специфичности, и активный язык ничем не выделялся. */
+#lp-bar .lp-lang button.on{background:#EE4729;font-weight:600;color:#fff}
+#lp-bar .lp-lang:has(button.on){border-color:#EE4729}
 .lp-lang .del{padding:6px 8px;background:#222;color:#ff8f78;border-left:1px solid #555}
+#lp-bar .lp-lang .del{padding:6px 8px;background:#222;color:#ff8f78}
 .lp-lang .del:hover{background:#402020}
 .lp-status{font-weight:600}
 body{padding-bottom:110px}
@@ -269,12 +273,15 @@ JS = r'''
 
   function renderLangs() {
     var nm = names(), codes = Object.keys(nm);
+    var dl = '<span class="sp"></span>' +
+      '<button data-act="one">Скачать язык</button>' +
+      '<button data-act="all">Скачать все</button>';
     bar.querySelector('.lp-langs').innerHTML = '<b>Язык:</b>' + codes.map(function (c) {
       return '<span class="lp-lang"><button data-lang="' + c + '" class="' +
         (c === current ? 'on' : '') + '">' + nm[c] + '</button>' +
         (codes.length > 1 ? '<button class="del" data-del="' + c + '" title="Удалить язык">×</button>' : '') +
         '</span>';
-    }).join('') + '<button data-act="add">+ Добавить язык</button>';
+    }).join('') + '<button data-act="add">+ Добавить язык</button>' + dl;
   }
 
   function download(name, text) {
@@ -434,8 +441,6 @@ JS = r'''
       '<button data-act="publish" class="primary">Сохранить</button>' +
       '<button data-act="reset">Сбросить правки</button>' +
       '<span class="sp"></span>' +
-      '<button data-act="one">Скачать язык</button>' +
-      '<button data-act="all">Скачать все</button>' +
     '</div>';
   document.body.appendChild(bar);
 
