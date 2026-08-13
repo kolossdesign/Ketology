@@ -243,7 +243,9 @@ def cmd_build(args):
     for lang in langs:
         (cdir / f'{lang}.json').write_text(
             json.dumps(all_data[lang], ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    (cdir / '_index.json').write_text(
+    # WHY: имя без подчёркивания — GitHub Pages прогоняет сайт через Jekyll,
+    # а тот молча не отдаёт файлы, начинающиеся с «_» (отдавал 404).
+    (cdir / 'languages.json').write_text(
         json.dumps({'languages': {l: LANG_NAMES.get(l, l.upper()) for l in langs}},
                    ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 

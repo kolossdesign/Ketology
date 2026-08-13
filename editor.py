@@ -308,7 +308,7 @@ JS = r'''
         jobs.push([r.repo, r.dir + c + '.json',
                    JSON.stringify(dataOf(c), null, 2) + '\n']);
       });
-      jobs.push([r.repo, r.dir + '_index.json',
+      jobs.push([r.repo, r.dir + 'languages.json',
                  JSON.stringify({languages: nm}, null, 2) + '\n']);
     });
 
@@ -405,7 +405,7 @@ JS = r'''
     updateStatus();
   }
 
-  fetch('../content/_index.json', {cache: 'no-store'})
+  fetch('../content/languages.json', {cache: 'no-store'})
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (idx) {
       if (!idx) return null;
