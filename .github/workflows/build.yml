@@ -1,0 +1,74 @@
+name: Сборка и публикация лендинга
+
+# WHY: редактор пишет только content/*.json. Всё остальное — страницы, фрагмент
+# для екома, копия текстов рядом с сайтом — собирается здесь, чтобы человеку
+# не нужно было ничего пересобирать руками.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/**'
+      - 'src/**'
+      - 'assets/**'
+      - 'build.py'
+      - 'editor.py'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Проверить локали
+        run: python3 build.py check
+
+      - name: Собрать
+        run: python3 build.py build --base https://kolossdesign.github.io/Ketology/
+
+      - name: Сложить сайт
+        run: |
+          rm -rf _site && mkdir -p _site
+          cp -r dist/* _site/
+          cp -r assets _site/assets
+          touch _site/.nojekyll
+
+      - name: Вернуть собранное в репозиторий
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dist
+          git diff --cached --quiet || git commit -m "автосборка: dist [skip ci]"
+          git push
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
