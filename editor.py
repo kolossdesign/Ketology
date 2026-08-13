@@ -520,7 +520,35 @@ JS = r'''
 
   // WHY: тексты лежат рядом с сайтом в content/*.json и читаются в рантайме —
   // тогда сохранённая правка видна всем сразу, без пересборки страницы.
+  function prune() {
+    // WHY: в браузере копится мусор. Язык удалили и сохранили — в проекте его
+    // уже нет, а отметка «удалён язык» висит вечно. То же с правками, которые
+    // давно уехали: они совпадают с опубликованным текстом, но числятся своими.
+    var dirty = false;
+
+    state.removed = (state.removed || []).filter(function (c) {
+      if (LOCALES[c]) return true;              // язык ещё в проекте — отметка нужна
+      dirty = true;
+      return false;
+    });
+
+    Object.keys(state.locales).forEach(function (code) {
+      var st = state.locales[code], base = baseOf(code), data = st.data || {};
+      if (!LOCALES[code] && !st.base) return;   // язык ещё не сохранён — не трогаем
+      Object.keys(data).forEach(function (k) {
+        if (same(data[k], base[k])) { delete data[k]; dirty = true; }
+      });
+      if (LOCALES[code] && !Object.keys(data).length) {
+        delete state.locales[code];
+        dirty = true;
+      }
+    });
+
+    if (dirty) localStorage.setItem(STORE, JSON.stringify(state));
+  }
+
   function boot() {
+    prune();
     var want = new URLSearchParams(location.search).get('lang');
     apply(want && names()[want] ? want : (names()[CURRENT] ? CURRENT : Object.keys(names())[0]));
     updateStatus();
