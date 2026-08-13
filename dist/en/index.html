@@ -6241,15 +6241,31 @@ var REPOS = [{"repo": "kolossdesign/Ketology", "dir": "content/"}];
   // WHY: страница статическая, сервера нет. Единственный способ сделать правку
   // настоящей — записать файлы через GitHub API. Токен вводится один раз и
   // лежит ТОЛЬКО в этом браузере: в репозиторий он не попадает никогда.
-  function token(force) {
-    var t = localStorage.getItem('ketology-gh-token');
-    if (!t || force) {
-      t = (prompt('GitHub-токен с правом записи в ' + REPOS[0].repo +
-                  '\n(сохранится только в этом браузере)') || '').trim();
-      if (!t) return null;
-      localStorage.setItem('ketology-gh-token', t);
+  function token() {
+    var t = (localStorage.getItem('ketology-gh-token') || '').trim();
+    if (t) return t;
+    // WHY: раньше при пустом ответе кнопка молча ничего не делала и выглядела
+    // сломанной. Теперь объясняем, что именно нужно и где это взять.
+    t = (prompt(
+      'Чтобы сохранить правки в проект, нужен GitHub-токен.\n\n' +
+      'Как получить: github.com/settings/personal-access-tokens/new\n' +
+      '  · Repository access: Only select repositories → ' + REPOS[0].repo + '\n' +
+      '  · Permissions → Contents: Read and write\n\n' +
+      'Токен останется только в этом браузере. Вставьте его сюда:') || '').trim();
+    if (!t) {
+      say('Токен не введён — правки остались только в браузере.', true);
+      return null;
     }
+    localStorage.setItem('ketology-gh-token', t);
     return t;
+  }
+
+  function say(text, bad) {
+    var el = bar.querySelector('.lp-status');
+    el.textContent = (bad ? '⚠ ' : '') + text;
+    el.style.color = bad ? '#ff8f78' : '#8ede9a';
+    clearTimeout(say._t);
+    say._t = setTimeout(updateStatus, 6000);
   }
 
   function gh(tok, method, repo, path, body) {
@@ -6290,7 +6306,7 @@ var REPOS = [{"repo": "kolossdesign/Ketology", "dir": "content/"}];
   }
 
   function publish(btn) {
-    var tok = token(false);
+    var tok = token();
     if (!tok) return;
     var nm = names(), codes = Object.keys(nm);
     var label = btn.textContent;
@@ -6307,7 +6323,17 @@ var REPOS = [{"repo": "kolossdesign/Ketology", "dir": "content/"}];
                  JSON.stringify({languages: nm}, null, 2) + '\n']);
     });
 
-    var chain = Promise.resolve();
+    // WHY: сначала одна дешёвая проверка доступа. Иначе половина файлов
+    // записалась бы, а на середине вылезла ошибка прав.
+    var chain = fetch('https://api.github.com/repos/' + REPOS[0].repo, {
+      headers: {Authorization: 'token ' + tok, Accept: 'application/vnd.github+json'}
+    }).then(function (r) {
+      if (r.status === 401) throw new Error('Bad credentials');
+      if (r.status === 404) throw new Error('Not Found');
+      return r.json();
+    }).then(function (repo) {
+      if (!repo.permissions || !repo.permissions.push) throw new Error('not accessible: нет права записи');
+    });
     jobs.forEach(function (j) {
       chain = chain.then(function () {
         return writeFile(tok, j[0], j[1], j[2], 'ketology: правка текстов из редактора');
@@ -6330,11 +6356,18 @@ var REPOS = [{"repo": "kolossdesign/Ketology", "dir": "content/"}];
     }).catch(function (err) {
       btn.textContent = label;
       btn.disabled = false;
-      if (String(err).indexOf('401') > -1 || String(err).indexOf('Bad credentials') > -1) {
+      var m = String(err.message || err);
+      if (m.indexOf('Bad credentials') > -1 || m.indexOf('401') > -1) {
         localStorage.removeItem('ketology-gh-token');
-        alert('Токен не подошёл. Нажмите «Сохранить в проект» ещё раз и введите новый.');
+        say('Токен не подошёл — нажмите «Сохранить» и введите новый.', true);
+      } else if (m.indexOf('Not Found') > -1 || m.indexOf('404') > -1) {
+        localStorage.removeItem('ketology-gh-token');
+        say('Токен не видит репозиторий. В настройках токена: Repository access → ' +
+            REPOS[0].repo + '.', true);
+      } else if (m.indexOf('not accessible') > -1 || m.indexOf('403') > -1) {
+        say('У токена нет права записи. Нужно Permissions → Contents: Read and write.', true);
       } else {
-        alert('Не сохранилось: ' + err.message);
+        say('Не сохранилось: ' + m.slice(0, 120), true);
       }
     });
   }
@@ -6345,7 +6378,7 @@ var REPOS = [{"repo": "kolossdesign/Ketology", "dir": "content/"}];
     '<div class="lp-row lp-langs"></div>' +
     '<div class="lp-row">' +
       '<span class="lp-status"></span>' +
-      '<button data-act="publish" class="primary">Сохранить в проект</button>' +
+      '<button data-act="publish" class="primary">Сохранить</button>' +
       '<button data-act="reset">Сбросить правки</button>' +
       '<span class="sp"></span>' +
       '<button data-act="hidden" title="Заголовок для поисковика, описание ' +
