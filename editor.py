@@ -101,13 +101,13 @@ JS = r'''
     if (raw && raw.locales) state = raw;
   } catch (e) {}
   function save() {
-    state.dirty = true;
     localStorage.setItem(STORE, JSON.stringify(state));
     updateStatus();
   }
 
   function pending() {
-    return !!state.dirty && !!(Object.keys(state.locales).length || state.removed.length);
+    var t = tally();
+    return !!(t.edits || t.added || t.removed);
   }
 
   function plural(n, one, few, many) {
@@ -172,6 +172,10 @@ JS = r'''
     return (p && p !== document.body) ? p : n;
   }
   function put(key, value) {
+    // WHY: клик по тексту и уход с него без правок вызывали запись значения,
+    // и страница считала, что есть несохранённые изменения. Пишем только то,
+    // что реально отличается от текущего.
+    if (same(value, dataOf(current)[key])) return;
     if (!state.locales[current]) state.locales[current] = {name: names()[current], data: {}};
     state.locales[current].data[key] = value;
     save();
@@ -436,7 +440,12 @@ JS = r'''
     });
 
     chain.then(function () {
-      state.dirty = false;
+      // WHY: после записи опубликованной версией считается то, что записали.
+      // Иначе прежние правки навсегда оставались бы «несохранёнными».
+      codes.forEach(function (c) { LOCALES[c] = dataOf(c); });
+      (state.removed || []).forEach(function (c) { delete LOCALES[c]; });
+      state.locales = {};
+      state.removed = [];
       localStorage.setItem(STORE, JSON.stringify(state));
       btn.textContent = 'Сохранено ✓';
       updateStatus();
