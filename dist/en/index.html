@@ -5995,8 +5995,6 @@ x-t:focus{outline:none}
 .lp-frame{border-radius:4px}
 .lp-frame:focus-within{outline:2px solid #EE4729;outline-offset:6px;
   background:rgba(238,71,41,.05)}
-.lp-frame.is-changed{outline:2px solid #E8B500;outline-offset:6px;background:rgba(255,214,0,.16)}
-.lp-frame.is-changed:focus-within{outline-color:#EE4729}
 
 #lp-bar{position:fixed;left:0;right:0;bottom:0;z-index:100000;
   font:14px/1.4 system-ui,sans-serif;background:#161616;color:#fff}
@@ -6069,13 +6067,14 @@ var CURRENT = "en";
   }
 
   function markAll() {
-    var base = LOCALES[current] || {};
+    // WHY: изменённый блок НЕ подсвечиваем — после снятия фокуса он должен
+    // выглядеть ровно так же, как на боевой странице. Счёт ведём в панели.
+    var base = LOCALES[current] || {}, cnt = 0;
     document.querySelectorAll('x-t[data-k]').forEach(function (n) {
-      var was = String(base[n.dataset.k] == null ? '' : base[n.dataset.k]).replace(/&nbsp;/g, ' ');
-      var now = clean(n.innerHTML).replace(/&nbsp;/g, ' ');
-      frameOf(n).classList.toggle('is-changed', now !== was);
+      var was = String(base[n.dataset.k] == null ? '' : base[n.dataset.k]).replace(/&nbsp;/g, ' ');
+      var now = clean(n.innerHTML).replace(/&nbsp;/g, ' ');
+      if (now !== was) cnt++;
     });
-    var cnt = document.querySelectorAll('.lp-frame.is-changed').length;
     var el = bar.querySelector('.lp-count');
     if (el) el.textContent = cnt ? 'изменено блоков: ' + cnt : 'изменений нет';
   }
