@@ -110,21 +110,38 @@ JS = r'''
     return !!state.dirty && !!(Object.keys(state.locales).length || state.removed.length);
   }
 
-  var changedCount = 0;
+  function plural(n, one, few, many) {
+    var a = n % 100, b = n % 10;
+    if (a > 10 && a < 20) return many;
+    if (b === 1) return one;
+    if (b >= 2 && b <= 4) return few;
+    return many;
+  }
 
   function updateStatus() {
     var el = bar && bar.querySelector('.lp-status');
     if (!el) return;
-    // WHY: статус ровно один. Сколько блоков затронуто — уточнение в скобках,
-    // а не второй индикатор рядом.
-    if (pending()) {
-      el.textContent = '● есть несохранённые изменения' +
-        (changedCount ? ' (' + changedCount + ')' : '');
-      el.style.color = '#FFD600';
-    } else {
+    if (!pending()) {
       el.textContent = '✓ изменения сохранены';
       el.style.color = '#8ede9a';
+      return;
     }
+    var t = tally(), parts = [];
+    if (t.edits) {
+      parts.push(t.edits + ' ' + plural(t.edits, 'правка', 'правки', 'правок') +
+                 (t.langs > 1 ? ' в ' + t.langs + ' ' +
+                  plural(t.langs, 'языке', 'языках', 'языках') : ''));
+    }
+    if (t.added) {
+      parts.push(t.added === 1 ? 'добавлен язык'
+                 : 'добавлено ' + t.added + ' ' + plural(t.added, 'язык', 'языка', 'языков'));
+    }
+    if (t.removed) {
+      parts.push(t.removed === 1 ? 'удалён язык'
+                 : 'удалено ' + t.removed + ' ' + plural(t.removed, 'язык', 'языка', 'языков'));
+    }
+    el.textContent = '● не сохранено — ' + (parts.join(', ') || 'есть изменения');
+    el.style.color = '#FFD600';
   }
 
   // WHY: главный риск — закрыть вкладку и потерять работу. Браузер переспросит.
@@ -205,20 +222,31 @@ JS = r'''
     // изменения относительно того языка, с которого его скопировали, иначе
     // счётчик сразу показывает «изменено 80» на пустом месте.
     if (LOCALES[code]) return LOCALES[code];
-    var src = (state.locales[code] || {}).from;
-    return (src && LOCALES[src]) || {};
+    var st = state.locales[code] || {};
+    if (st.base) return st.base;
+    return (st.from && LOCALES[st.from]) || {};
+  }
+
+  function same(a, b) {
+    return String(a == null ? '' : a).replace(/&nbsp;/g, ' ') ===
+           String(b == null ? '' : b).replace(/&nbsp;/g, ' ');
+  }
+
+  function tally() {
+    // WHY: правки копятся по всем языкам сразу, а счётчик показывал только
+    // текущий — человек правил два языка и видел «1».
+    var edits = 0, langs = 0, added = 0;
+    Object.keys(state.locales).forEach(function (code) {
+      if (state.removed.indexOf(code) !== -1) return;
+      var base = baseOf(code), data = state.locales[code].data || {}, n = 0;
+      Object.keys(data).forEach(function (k) { if (!same(data[k], base[k])) n++; });
+      if (n) { edits += n; langs++; }
+      if (!LOCALES[code]) added++;
+    });
+    return {edits: edits, langs: langs, added: added, removed: state.removed.length};
   }
 
   function markAll() {
-    // WHY: изменённый блок НЕ подсвечиваем — после снятия фокуса он должен
-    // выглядеть ровно так же, как на боевой странице. Счёт ведём в панели.
-    var base = baseOf(current), cnt = 0;
-    document.querySelectorAll('x-t[data-k]').forEach(function (n) {
-      var was = String(base[n.dataset.k] == null ? '' : base[n.dataset.k]).replace(/&nbsp;/g, ' ');
-      var now = clean(n.innerHTML).replace(/&nbsp;/g, ' ');
-      if (now !== was) cnt++;
-    });
-    changedCount = cnt;
     updateStatus();
   }
 
@@ -461,7 +489,11 @@ JS = r'''
       var code = codeFor(title);
       var from = current;
       state.removed = state.removed.filter(function (x) { return x !== code; });
-      state.locales[code] = {name: title, from: from, data: dataOf(from)};
+      var snapshot = dataOf(from);
+      // WHY: базой для нового языка служит снимок исходного НА МОМЕНТ создания,
+      // иначе несохранённые правки языка-донора сразу считались правками нового.
+      state.locales[code] = {name: title, from: from, base: snapshot,
+                             data: JSON.parse(JSON.stringify(snapshot))};
       save();
       apply(code);
       return;
