@@ -7,6 +7,7 @@
   python3 build.py new en                    — завести новую локаль из ru.json
   python3 build.py check                     — проверить локали без сборки
   python3 build.py find "кусок текста"        — найти ключ и все его переводы
+  python3 build.py import-locales locales.json — забрать языки из редактора
 
 На каждую локаль получается два файла:
   dist/<lang>/index.html     — самостоятельная страница (для превью и GitHub Pages)
@@ -26,6 +27,9 @@ TODO = 'TODO: '
 
 LANG_NAMES = {'ru': 'Русский', 'en': 'English', 'de': 'Deutsch',
               'fr': 'Français', 'pl': 'Polski'}
+_names_file = pathlib.Path(__file__).parent / 'content' / '_languages.json'
+if _names_file.exists():
+    LANG_NAMES.update(json.loads(_names_file.read_text(encoding='utf-8')))
 
 
 def load(lang):
@@ -38,28 +42,17 @@ def ecom(part):
     return p.read_text(encoding='utf-8') if p.exists() else ''
 
 
-def lang_switcher(current, langs, draft=False, edit=False):
+def lang_switcher(current, langs, draft=False):
     """Переключатель языков — только для превью, в еком-фрагмент не попадает."""
     mark = ('<b class="lp-draft">черновой перевод — заменить на перевод от переводчиков</b>'
             if draft else '')
-    page = 'edit.html' if edit else ''
-    items = ''.join(
-        f'<a href="../{l}/{page}" class="{"is-active" if l == current else ""}">'
-        f'{LANG_NAMES.get(l, l)}</a>'
-        for l in langs)
     return (
         '<div class="lp-langbar">'
-        '<span>Превью лендинга Ketology — язык:</span>' + items +
-        '<a class="lp-edit-link" href="edit.html">✏ Редактировать тексты</a>' + mark +
+        '<span>Превью лендинга Ketology</span>' + mark +
         '</div>'
         '<style>'
         '.lp-langbar{position:sticky;top:0;z-index:9999;display:flex;gap:14px;align-items:center;'
         'background:#161616;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:10px 20px}'
-        '.lp-langbar a{color:#fff;opacity:.6;text-decoration:none;border-bottom:1px solid transparent}'
-        '.lp-langbar a:hover{opacity:1}'
-        '.lp-langbar a.is-active{opacity:1;font-weight:600;border-bottom-color:#EE4729}'
-        '.lp-langbar .lp-edit-link{opacity:1;border:1px solid #555;border-radius:6px;'
-        'padding:3px 10px;margin-left:12px}'
         '.lp-draft{margin-left:auto;background:#EE4729;color:#fff;font-weight:600;'
         'padding:4px 10px;border-radius:4px}'
         # WHY: шапка и подвал в превью — макет чужого сайта. Клики по ним гасим,
@@ -74,7 +67,7 @@ def lang_switcher(current, langs, draft=False, edit=False):
 
 
 def locales():
-    return sorted(p.stem for p in CONTENT.glob('*.json'))
+    return sorted(p.stem for p in CONTENT.glob('*.json') if not p.stem.startswith('_'))
 
 
 def render(tpl, data, lang):
@@ -201,6 +194,7 @@ def cmd_build(args):
     tpl = TEMPLATE.read_text(encoding='utf-8')
     ref = load('ru')
     langs = locales()
+    all_data = {l: load(l) for l in langs}
     ok = True
     for lang in langs:
         data = load(lang)
@@ -219,29 +213,17 @@ def cmd_build(args):
         out.mkdir(parents=True, exist_ok=True)
         # WHY: dist/<lang>/ лежит на два уровня глубже assets/ — без базы пути не разрешатся
         base = args.base or '../../'
-        # WHY: превью рендерим тем же способом, что редактор (с метками data-k),
-        # чтобы оно показывало ещё не выгруженные правки. Во фрагмент для екома
-        # это не попадает — он собирается из чистого page.
+        # WHY: одна страница на всё. Правка живёт прямо в превью, отдельного
+        # режима нет. Во фрагмент для екома ничего из этого не попадает.
         view = editor.render_editable(tpl, data, lang)
         view = (view.replace('<!--ECOM_CSS-->', ecom('css'))
                     .replace('<!--ECOM_HEADER-->',
                              lang_switcher(lang, langs, data.get('_draft', False)) + ecom('header'))
                     .replace('<!--ECOM_FOOTER-->', ecom('footer')))
         (out / 'index.html').write_text(
-            rebase(editor.build_view_page(view, lang, data), base), encoding='utf-8')
-        (out / 'fragment.html').write_text(rebase(to_fragment(page, lang), base), encoding='utf-8')
+            rebase(editor.build_page(view, lang, data, tpl, all_data, LANG_NAMES), base),
+            encoding='utf-8')
 
-        # WHY: редактор — отдельная страница, чтобы боевой index.html оставался чистым:
-        # ни contenteditable, ни лишнего JS в том, что уедет в еком.
-        edit = editor.render_editable(tpl, data, lang)
-        edit = (edit.replace('<!--ECOM_CSS-->', ecom('css'))
-                    .replace('<!--ECOM_HEADER-->',
-                             lang_switcher(lang, langs, data.get('_draft', False), edit=True)
-                             .replace('href="edit.html"', 'href="index.html"')
-                             .replace('✏ Редактировать тексты', '← Обычный просмотр') + ecom('header'))
-                    .replace('<!--ECOM_FOOTER-->', ecom('footer')))
-        (out / 'edit.html').write_text(
-            rebase(editor.build_edit_page(edit, lang, data, tpl), base), encoding='utf-8')
         status = 'ok'
         if missing:
             status = f'НЕТ КЛЮЧЕЙ: {len(missing)} ({", ".join(missing[:3])}…)'
@@ -273,6 +255,39 @@ def cmd_new(args):
     new['meta.lang'] = args.lang
     dst.write_text(json.dumps(new, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(f'{dst}: {len(new)} строк, все помечены "{TODO}"')
+    return 0
+
+
+def cmd_import_locales(args):
+    """Забирает locales.json из редактора: новые языки, правки, удаления."""
+    bundle = json.loads(pathlib.Path(args.file).read_text(encoding='utf-8'))
+    langs = bundle.get('languages') or {}
+    if not langs:
+        sys.exit('в файле нет ключа languages — это не выгрузка редактора')
+    ref = load('ru') if (CONTENT / 'ru.json').exists() else None
+
+    for code, item in sorted(langs.items()):
+        texts = item.get('texts') or {}
+        if ref:
+            miss = [k for k in ref if k not in texts]
+            if miss:
+                print(f'  {code}: НЕТ {len(miss)} ключей ({", ".join(miss[:3])}…) — пропускаю')
+                continue
+        path = CONTENT / f'{code}.json'
+        was = 'обновлён' if path.exists() else 'СОЗДАН'
+        path.write_text(json.dumps(texts, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        print(f'  {code} ({item.get("name", code)}): {was}, строк {len(texts)}')
+
+    for code in bundle.get('removed') or []:
+        path = CONTENT / f'{code}.json'
+        if path.exists():
+            path.unlink()
+            print(f'  {code}: УДАЛЁН')
+    # WHY: имена новых языков нужны переключателю — иначе он покажет голый код
+    names = {c: i.get('name') for c, i in langs.items() if i.get('name')}
+    (ROOT / 'content' / '_languages.json').write_text(
+        json.dumps(names, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    print('состав языков:', ', '.join(sorted(langs)))
     return 0
 
 
@@ -334,5 +349,6 @@ b = sub.add_parser('build'); b.add_argument('--base', default=''); b.set_default
 n = sub.add_parser('new'); n.add_argument('lang'); n.set_defaults(fn=cmd_new)
 c = sub.add_parser('check'); c.set_defaults(fn=cmd_check)
 f = sub.add_parser('find'); f.add_argument('text'); f.set_defaults(fn=cmd_find)
+i = sub.add_parser('import-locales'); i.add_argument('file'); i.set_defaults(fn=cmd_import_locales)
 a = p.parse_args()
 sys.exit(a.fn(a))
