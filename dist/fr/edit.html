@@ -109,7 +109,9 @@ h1,h2,h3,p{margin:0}
   padding:24px 24px 32px;display:flex;flex-direction:column;gap:24px;
 }
 .comp-card__icon{width:180px;height:180px;border-radius:50%;object-fit:cover}
-.comp-card__title{min-height:96px}
+/* WHY: у заголовка карточки НЕ должно быть min-height. С ним, если убрать строку
+   текста, описание под ним не подтягивалось — оставалась дыра. Три карточки
+   выравниваются по строке грида, а не подпоркой высоты. */
 
 /* ── block 3 — нутриенты ───────────────────────────────────────────────────── */
 .nutri{
@@ -233,7 +235,6 @@ h1,h2,h3,p{margin:0}
   .tasks{grid-template-columns:1fr 1fr;grid-template-rows:none}
   .task--tall{grid-row:span 1;min-height:420px}
   .composition,.flavors{grid-template-columns:1fr;gap:24px}
-  .comp-card__title{min-height:0}
 }
 @media (max-width:820px){
   .section{margin-top:64px}
@@ -5988,9 +5989,17 @@ h1,h2,h3,p{margin:0}
 
 <style>
 x-t{display:inline;font:inherit;color:inherit;letter-spacing:inherit}
-x-t:hover{outline:2px dashed #EE4729;outline-offset:3px;cursor:text;border-radius:3px}
-x-t:focus{outline:2px solid #EE4729;outline-offset:3px;background:rgba(238,71,41,.06)}
-x-t.is-changed{background:rgba(255,214,0,.28);box-shadow:0 0 0 2px rgba(255,214,0,.28)}
+x-t:focus{outline:none}
+/* WHY: рамку рисуем на РОДИТЕЛЕ, а не на самом x-t. Инлайновый элемент в несколько
+   строк обводится по каждой строке отдельно — получается «лапша». Родитель — это
+   и есть текстовый фрейм: заголовок, абзац, пункт списка, кнопка. */
+.lp-frame{position:relative;border-radius:4px;transition:outline-color .12s}
+.lp-frame:hover{outline:2px dashed #EE4729;outline-offset:6px;cursor:text}
+.lp-frame:focus-within{outline:2px solid #EE4729;outline-offset:6px;
+  background:rgba(238,71,41,.05)}
+.lp-frame.is-changed{outline:2px solid #E8B500;outline-offset:6px;
+  background:rgba(255,214,0,.18)}
+.lp-frame.is-changed:hover,.lp-frame.is-changed:focus-within{outline-color:#EE4729}
 #lp-editor{position:fixed;left:0;right:0;bottom:0;z-index:100000;font:14px/1.4 system-ui,sans-serif}
 .lp-ed__bar{display:flex;gap:12px;align-items:center;background:#161616;color:#fff;padding:10px 16px}
 .lp-ed__bar b{font-weight:600}
@@ -6052,6 +6061,7 @@ var BASE = {"meta.lang": "fr", "meta.title": "Ketology — shake vegan aux huile
   nodes.forEach(function (n) {
     n.setAttribute('contenteditable', 'true');
     n.setAttribute('spellcheck', 'false');
+    frameOf(n).classList.add('lp-frame');
     // WHY: из Word прилетает разметка со шрифтами и цветами — вставляем только текст
     n.addEventListener('paste', function (e) {
       e.preventDefault();
@@ -6070,6 +6080,13 @@ var BASE = {"meta.lang": "fr", "meta.title": "Ketology — shake vegan aux huile
   });
   inputs.forEach(function (i) { i.addEventListener('input', mark); });
 
+  function frameOf(n) {
+    // родитель = видимый текстовый фрейм; если внутри него несколько x-t
+    // (число + единица в КБЖУ), рамка охватит их вместе — так и надо
+    var p = n.parentElement;
+    return (p && p !== document.body) ? p : n;
+  }
+
   function current() {
     var out = {};
     nodes.forEach(function (n) { out[n.dataset.k] = clean(n.innerHTML); });
@@ -6079,11 +6096,15 @@ var BASE = {"meta.lang": "fr", "meta.title": "Ketology — shake vegan aux huile
 
   function mark() {
     var cur = current(), changed = 0;
+    var dirty = [];
     nodes.forEach(function (n) {
       var diff = cur[n.dataset.k] !== initial[n.dataset.k];
-      n.classList.toggle('is-changed', diff);
-      if (diff) changed++;
+      if (diff) { changed++; dirty.push(frameOf(n)); }
     });
+    document.querySelectorAll('.lp-frame.is-changed').forEach(function (f) {
+      if (dirty.indexOf(f) === -1) f.classList.remove('is-changed');
+    });
+    dirty.forEach(function (f) { f.classList.add('is-changed'); });
     inputs.forEach(function (i) {
       if (cur[i.dataset.hk] !== initial[i.dataset.hk]) changed++;
     });

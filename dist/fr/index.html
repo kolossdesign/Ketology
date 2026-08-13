@@ -109,7 +109,9 @@ h1,h2,h3,p{margin:0}
   padding:24px 24px 32px;display:flex;flex-direction:column;gap:24px;
 }
 .comp-card__icon{width:180px;height:180px;border-radius:50%;object-fit:cover}
-.comp-card__title{min-height:96px}
+/* WHY: у заголовка карточки НЕ должно быть min-height. С ним, если убрать строку
+   текста, описание под ним не подтягивалось — оставалась дыра. Три карточки
+   выравниваются по строке грида, а не подпоркой высоты. */
 
 /* ── block 3 — нутриенты ───────────────────────────────────────────────────── */
 .nutri{
@@ -233,7 +235,6 @@ h1,h2,h3,p{margin:0}
   .tasks{grid-template-columns:1fr 1fr;grid-template-rows:none}
   .task--tall{grid-row:span 1;min-height:420px}
   .composition,.flavors{grid-template-columns:1fr;gap:24px}
-  .comp-card__title{min-height:0}
 }
 @media (max-width:820px){
   .section{margin-top:64px}

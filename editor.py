@@ -85,9 +85,17 @@ def _esc(s):
 
 CSS = '''
 x-t{display:inline;font:inherit;color:inherit;letter-spacing:inherit}
-x-t:hover{outline:2px dashed #EE4729;outline-offset:3px;cursor:text;border-radius:3px}
-x-t:focus{outline:2px solid #EE4729;outline-offset:3px;background:rgba(238,71,41,.06)}
-x-t.is-changed{background:rgba(255,214,0,.28);box-shadow:0 0 0 2px rgba(255,214,0,.28)}
+x-t:focus{outline:none}
+/* WHY: рамку рисуем на РОДИТЕЛЕ, а не на самом x-t. Инлайновый элемент в несколько
+   строк обводится по каждой строке отдельно — получается «лапша». Родитель — это
+   и есть текстовый фрейм: заголовок, абзац, пункт списка, кнопка. */
+.lp-frame{position:relative;border-radius:4px;transition:outline-color .12s}
+.lp-frame:hover{outline:2px dashed #EE4729;outline-offset:6px;cursor:text}
+.lp-frame:focus-within{outline:2px solid #EE4729;outline-offset:6px;
+  background:rgba(238,71,41,.05)}
+.lp-frame.is-changed{outline:2px solid #E8B500;outline-offset:6px;
+  background:rgba(255,214,0,.18)}
+.lp-frame.is-changed:hover,.lp-frame.is-changed:focus-within{outline-color:#EE4729}
 #lp-editor{position:fixed;left:0;right:0;bottom:0;z-index:100000;font:14px/1.4 system-ui,sans-serif}
 .lp-ed__bar{display:flex;gap:12px;align-items:center;background:#161616;color:#fff;padding:10px 16px}
 .lp-ed__bar b{font-weight:600}
@@ -135,6 +143,7 @@ JS = '''
   nodes.forEach(function (n) {
     n.setAttribute('contenteditable', 'true');
     n.setAttribute('spellcheck', 'false');
+    frameOf(n).classList.add('lp-frame');
     // WHY: из Word прилетает разметка со шрифтами и цветами — вставляем только текст
     n.addEventListener('paste', function (e) {
       e.preventDefault();
@@ -153,6 +162,13 @@ JS = '''
   });
   inputs.forEach(function (i) { i.addEventListener('input', mark); });
 
+  function frameOf(n) {
+    // родитель = видимый текстовый фрейм; если внутри него несколько x-t
+    // (число + единица в КБЖУ), рамка охватит их вместе — так и надо
+    var p = n.parentElement;
+    return (p && p !== document.body) ? p : n;
+  }
+
   function current() {
     var out = {};
     nodes.forEach(function (n) { out[n.dataset.k] = clean(n.innerHTML); });
@@ -162,11 +178,15 @@ JS = '''
 
   function mark() {
     var cur = current(), changed = 0;
+    var dirty = [];
     nodes.forEach(function (n) {
       var diff = cur[n.dataset.k] !== initial[n.dataset.k];
-      n.classList.toggle('is-changed', diff);
-      if (diff) changed++;
+      if (diff) { changed++; dirty.push(frameOf(n)); }
     });
+    document.querySelectorAll('.lp-frame.is-changed').forEach(function (f) {
+      if (dirty.indexOf(f) === -1) f.classList.remove('is-changed');
+    });
+    dirty.forEach(function (f) { f.classList.add('is-changed'); });
     inputs.forEach(function (i) {
       if (cur[i.dataset.hk] !== initial[i.dataset.hk]) changed++;
     });
