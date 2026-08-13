@@ -6020,10 +6020,6 @@ x-t:focus{outline:none}
 #lp-hidden span{opacity:.6;font-family:ui-monospace,monospace;font-size:12px}
 #lp-hidden input{font:inherit;padding:6px 10px;border-radius:6px;border:1px solid #444;
   background:#111;color:#fff}
-.lp-add label{display:inline-flex;align-items:center;gap:8px;opacity:.85}
-.lp-add input{font:inherit;padding:6px 10px;border-radius:6px;border:1px solid #444;
-  background:#111;color:#fff}
-.lp-hint{opacity:.6;font-size:13px}
 .lp-status{font-weight:600}
 body{padding-bottom:110px}
 </style><script>var ORDER = ["meta.lang", "meta.title", "meta.description", "hero.alt_1", "hero.title_1", "hero.text_1", "hero.btn_1", "hero.alt_2", "composition.title_1", "composition.alt_1", "composition.title_2", "composition.text_1", "composition.li_1", "composition.li_2", "composition.li_3", "composition.title_4", "composition.li_4", "composition.li_5", "composition.li_6", "composition.title_7", "composition.li_7", "composition.li_8", "composition.li_9", "composition.title_10", "composition.li_10", "composition.li_11", "composition.li_12", "nutrients.title_1", "nutrients.text_1", "nutrients.num_1", "nutrients.text_2", "nutrients.text_3", "nutrients.num_2", "nutrients.text_4", "nutrients.num_3", "nutrients.text_5", "nutrients.text_6", "nutrients.num_4", "nutrients.text_7", "nutrients.text_8", "nutrients.num_5", "nutrients.text_9", "nutrients.text_10", "nutrients.num_6", "nutrients.text_11", "nutrients.text_12", "nutrients.alt_1", "compare.title_1", "compare.text_1", "compare.text_2", "compare.text_3", "compare.arialabel_1", "compare.arialabel_2", "compare.text_4", "compare.arialabel_3", "compare.text_5", "compare.text_6", "compare.arialabel_4", "compare.arialabel_5", "compare.text_7", "compare.arialabel_6", "compare.text_8", "compare.text_9", "compare.arialabel_7", "compare.arialabel_8", "tasks.title_1", "tasks.title_2", "tasks.text_1", "tasks.title_3", "tasks.text_2", "tasks.title_4", "tasks.text_3", "tasks.title_5", "tasks.text_4", "tasks.title_7", "tasks.text_5", "flavors.title_1", "flavors.alt_1", "flavors.title_2", "flavors.text_1", "flavors.btn_1", "flavors.alt_2", "flavors.title_3", "flavors.text_2", "flavors.btn_2", "flavors.alt_3", "flavors.title_4", "flavors.text_3", "flavors.btn_3", "expert.title_1", "expert.alt_1", "expert.quote_1", "expert.text_1", "expert.text_2", "quality.title_1", "quality.text_1", "quality.alt_1", "quality.alt_2", "quality.alt_3", "quality.alt_4", "cta.alt_1", "cta.title_1", "cta.text_1", "cta.btn_1", "compare.mobile_ketology", "compare.mobile_diet"];
@@ -6100,6 +6096,46 @@ var REPOS = [{"repo": "kolossdesign/Ketology", "dir": "content/"}];
     if (!state.locales[current]) state.locales[current] = {name: names()[current], data: {}};
     state.locales[current].data[key] = value;
     save();
+  }
+
+  // WHY: у человека спрашиваем только название. Код нужен технически — он
+  // становится именем файла, адресом /xx/ и атрибутом lang, — поэтому выводим
+  // его сами: по словарю, иначе из первых латинских букв названия.
+  var CODES = {
+    'italiano': 'it', 'italian': 'it', 'итальянский': 'it',
+    'espanol': 'es', 'español': 'es', 'spanish': 'es', 'испанский': 'es',
+    'portugues': 'pt', 'português': 'pt', 'portuguese': 'pt', 'португальский': 'pt',
+    'polski': 'pl', 'polish': 'pl', 'польский': 'pl',
+    'deutsch': 'de', 'german': 'de', 'немецкий': 'de',
+    'francais': 'fr', 'français': 'fr', 'french': 'fr', 'французский': 'fr',
+    'english': 'en', 'английский': 'en',
+    'русский': 'ru', 'russian': 'ru',
+    'nederlands': 'nl', 'dutch': 'nl', 'нидерландский': 'nl',
+    'čeština': 'cs', 'cestina': 'cs', 'czech': 'cs', 'чешский': 'cs',
+    'română': 'ro', 'romana': 'ro', 'romanian': 'ro', 'румынский': 'ro',
+    'українська': 'uk', 'ukrainian': 'uk', 'украинский': 'uk',
+    'қазақша': 'kk', 'kazakh': 'kk', 'казахский': 'kk',
+    'türkçe': 'tr', 'turkce': 'tr', 'turkish': 'tr', 'турецкий': 'tr',
+    '中文': 'zh', 'chinese': 'zh', 'китайский': 'zh',
+    'magyar': 'hu', 'hungarian': 'hu', 'венгерский': 'hu',
+    'български': 'bg', 'bulgarian': 'bg', 'болгарский': 'bg',
+    'srpski': 'sr', 'serbian': 'sr', 'сербский': 'sr',
+    'suomi': 'fi', 'finnish': 'fi', 'финский': 'fi',
+    'latviešu': 'lv', 'latvian': 'lv', 'латышский': 'lv',
+    'lietuvių': 'lt', 'lithuanian': 'lt', 'литовский': 'lt',
+    'eesti': 'et', 'estonian': 'et', 'эстонский': 'et'
+  };
+
+  function codeFor(title) {
+    var key = title.toLowerCase().trim();
+    var code = CODES[key];
+    if (!code) {
+      var latin = key.replace(/[^a-z]/g, '');
+      code = latin.slice(0, 2) || 'l' + (Object.keys(names()).length + 1);
+    }
+    var taken = names(), base = code, n = 2;
+    while (taken[code]) { code = base.slice(0, 1) + n; n++; }   // код занят — подбираем свободный
+    return code;
   }
 
   function baseOf(code) {
@@ -6307,14 +6343,6 @@ var REPOS = [{"repo": "kolossdesign/Ketology", "dir": "content/"}];
   bar.id = 'lp-bar';
   bar.innerHTML =
     '<div class="lp-row lp-langs"></div>' +
-    '<div class="lp-row lp-add" hidden>' +
-      '<label>Название языка <input class="lp-name" placeholder="Italiano" size="18"></label>' +
-      '<label>Код <input class="lp-code" placeholder="it" size="4" maxlength="2"></label>' +
-      '<button data-act="add-ok" class="primary">Добавить</button>' +
-      '<button data-act="add-no">Отмена</button>' +
-      '<span class="lp-hint">Код из двух латинских букв — он станет адресом ' +
-      'страницы и атрибутом языка.</span>' +
-    '</div>' +
     '<div class="lp-row">' +
       '<span class="lp-status"></span>' +
       '<button data-act="publish" class="primary">Сохранить в проект</button>' +
@@ -6340,32 +6368,13 @@ var REPOS = [{"repo": "kolossdesign/Ketology", "dir": "content/"}];
       return apply(c === current ? Object.keys(names())[0] : current);
     }
     if (act === 'add') {
-      var box = bar.querySelector('.lp-add');
-      box.hidden = false;
-      box.querySelector('.lp-name').value = '';
-      box.querySelector('.lp-code').value = '';
-      box.querySelector('.lp-name').focus();
-      return;
-    }
-    if (act === 'add-no') { bar.querySelector('.lp-add').hidden = true; return; }
-    if (act === 'add-ok') {
-      var box2 = bar.querySelector('.lp-add');
-      var title = box2.querySelector('.lp-name').value.trim();
-      var code = box2.querySelector('.lp-code').value.trim().toLowerCase();
-      var hint = box2.querySelector('.lp-hint');
-      if (!title) { hint.textContent = 'Впишите название языка.'; hint.style.color = '#ff8f78'; return; }
-      if (!/^[a-z]{2}$/.test(code)) {
-        hint.textContent = 'Код — ровно две латинские буквы: it, es, pt.';
-        hint.style.color = '#ff8f78';
-        return;
-      }
-      if (names()[code]) { hint.textContent = 'Язык с кодом ' + code + ' уже есть.';
-                           hint.style.color = '#ff8f78'; return; }
+      var title = (prompt('Название языка, например Italiano:') || '').trim();
+      if (!title) return;
+      var code = codeFor(title);
       var from = current;
       state.removed = state.removed.filter(function (x) { return x !== code; });
       state.locales[code] = {name: title, from: from, data: dataOf(from)};
       save();
-      box2.hidden = true;
       apply(code);
       return;
     }

@@ -89,10 +89,6 @@ x-t:focus{outline:none}
 #lp-hidden span{opacity:.6;font-family:ui-monospace,monospace;font-size:12px}
 #lp-hidden input{font:inherit;padding:6px 10px;border-radius:6px;border:1px solid #444;
   background:#111;color:#fff}
-.lp-add label{display:inline-flex;align-items:center;gap:8px;opacity:.85}
-.lp-add input{font:inherit;padding:6px 10px;border-radius:6px;border:1px solid #444;
-  background:#111;color:#fff}
-.lp-hint{opacity:.6;font-size:13px}
 .lp-status{font-weight:600}
 body{padding-bottom:110px}
 '''
@@ -165,6 +161,46 @@ JS = r'''
     if (!state.locales[current]) state.locales[current] = {name: names()[current], data: {}};
     state.locales[current].data[key] = value;
     save();
+  }
+
+  // WHY: у человека спрашиваем только название. Код нужен технически — он
+  // становится именем файла, адресом /xx/ и атрибутом lang, — поэтому выводим
+  // его сами: по словарю, иначе из первых латинских букв названия.
+  var CODES = {
+    'italiano': 'it', 'italian': 'it', 'итальянский': 'it',
+    'espanol': 'es', 'español': 'es', 'spanish': 'es', 'испанский': 'es',
+    'portugues': 'pt', 'português': 'pt', 'portuguese': 'pt', 'португальский': 'pt',
+    'polski': 'pl', 'polish': 'pl', 'польский': 'pl',
+    'deutsch': 'de', 'german': 'de', 'немецкий': 'de',
+    'francais': 'fr', 'français': 'fr', 'french': 'fr', 'французский': 'fr',
+    'english': 'en', 'английский': 'en',
+    'русский': 'ru', 'russian': 'ru',
+    'nederlands': 'nl', 'dutch': 'nl', 'нидерландский': 'nl',
+    'čeština': 'cs', 'cestina': 'cs', 'czech': 'cs', 'чешский': 'cs',
+    'română': 'ro', 'romana': 'ro', 'romanian': 'ro', 'румынский': 'ro',
+    'українська': 'uk', 'ukrainian': 'uk', 'украинский': 'uk',
+    'қазақша': 'kk', 'kazakh': 'kk', 'казахский': 'kk',
+    'türkçe': 'tr', 'turkce': 'tr', 'turkish': 'tr', 'турецкий': 'tr',
+    '中文': 'zh', 'chinese': 'zh', 'китайский': 'zh',
+    'magyar': 'hu', 'hungarian': 'hu', 'венгерский': 'hu',
+    'български': 'bg', 'bulgarian': 'bg', 'болгарский': 'bg',
+    'srpski': 'sr', 'serbian': 'sr', 'сербский': 'sr',
+    'suomi': 'fi', 'finnish': 'fi', 'финский': 'fi',
+    'latviešu': 'lv', 'latvian': 'lv', 'латышский': 'lv',
+    'lietuvių': 'lt', 'lithuanian': 'lt', 'литовский': 'lt',
+    'eesti': 'et', 'estonian': 'et', 'эстонский': 'et'
+  };
+
+  function codeFor(title) {
+    var key = title.toLowerCase().trim();
+    var code = CODES[key];
+    if (!code) {
+      var latin = key.replace(/[^a-z]/g, '');
+      code = latin.slice(0, 2) || 'l' + (Object.keys(names()).length + 1);
+    }
+    var taken = names(), base = code, n = 2;
+    while (taken[code]) { code = base.slice(0, 1) + n; n++; }   // код занят — подбираем свободный
+    return code;
   }
 
   function baseOf(code) {
@@ -372,14 +408,6 @@ JS = r'''
   bar.id = 'lp-bar';
   bar.innerHTML =
     '<div class="lp-row lp-langs"></div>' +
-    '<div class="lp-row lp-add" hidden>' +
-      '<label>Название языка <input class="lp-name" placeholder="Italiano" size="18"></label>' +
-      '<label>Код <input class="lp-code" placeholder="it" size="4" maxlength="2"></label>' +
-      '<button data-act="add-ok" class="primary">Добавить</button>' +
-      '<button data-act="add-no">Отмена</button>' +
-      '<span class="lp-hint">Код из двух латинских букв — он станет адресом ' +
-      'страницы и атрибутом языка.</span>' +
-    '</div>' +
     '<div class="lp-row">' +
       '<span class="lp-status"></span>' +
       '<button data-act="publish" class="primary">Сохранить в проект</button>' +
@@ -405,32 +433,13 @@ JS = r'''
       return apply(c === current ? Object.keys(names())[0] : current);
     }
     if (act === 'add') {
-      var box = bar.querySelector('.lp-add');
-      box.hidden = false;
-      box.querySelector('.lp-name').value = '';
-      box.querySelector('.lp-code').value = '';
-      box.querySelector('.lp-name').focus();
-      return;
-    }
-    if (act === 'add-no') { bar.querySelector('.lp-add').hidden = true; return; }
-    if (act === 'add-ok') {
-      var box2 = bar.querySelector('.lp-add');
-      var title = box2.querySelector('.lp-name').value.trim();
-      var code = box2.querySelector('.lp-code').value.trim().toLowerCase();
-      var hint = box2.querySelector('.lp-hint');
-      if (!title) { hint.textContent = 'Впишите название языка.'; hint.style.color = '#ff8f78'; return; }
-      if (!/^[a-z]{2}$/.test(code)) {
-        hint.textContent = 'Код — ровно две латинские буквы: it, es, pt.';
-        hint.style.color = '#ff8f78';
-        return;
-      }
-      if (names()[code]) { hint.textContent = 'Язык с кодом ' + code + ' уже есть.';
-                           hint.style.color = '#ff8f78'; return; }
+      var title = (prompt('Название языка, например Italiano:') || '').trim();
+      if (!title) return;
+      var code = codeFor(title);
       var from = current;
       state.removed = state.removed.filter(function (x) { return x !== code; });
       state.locales[code] = {name: title, from: from, data: dataOf(from)};
       save();
-      box2.hidden = true;
       apply(code);
       return;
     }
