@@ -409,7 +409,9 @@ JS = r'''
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (idx) {
       if (!idx) return null;
-      var codes = Object.keys(idx.languages || {});
+      var codes = Object.keys(idx.languages || {}).filter(function (c) {
+        return c !== 'languages';
+      });
       codes.forEach(function (c) { LANG_NAMES[c] = idx.languages[c]; });
       return Promise.all(codes.map(function (c) {
         return fetch('../content/' + c + '.json', {cache: 'no-store'})

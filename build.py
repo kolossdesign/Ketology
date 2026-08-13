@@ -31,9 +31,9 @@ LANG_NAMES = {'ru': 'Русский', 'en': 'English', 'de': 'Deutsch',
 REPOS = [{'repo': 'kolossdesign/Ketology', 'dir': 'content/'},
          {'repo': 'kolossdesign/sw-prototypes', 'dir': 'ketology/content/'}]
 
-_names_file = pathlib.Path(__file__).parent / 'content' / '_languages.json'
+_names_file = pathlib.Path(__file__).parent / 'content' / 'languages.json'
 if _names_file.exists():
-    LANG_NAMES.update(json.loads(_names_file.read_text(encoding='utf-8')))
+    LANG_NAMES.update(json.loads(_names_file.read_text(encoding='utf-8')).get('languages', {}))
 
 
 def load(lang):
@@ -70,8 +70,15 @@ def lang_switcher(current, langs, draft=False):
         '</style>')
 
 
+# WHY: languages.json — манифест названий языков, а не локаль. Лежит в той же
+# папке, поэтому его надо исключать явно, иначе в переключателе появляется
+# язык «LANGUAGES», а его файл ещё и грузится дважды.
+SERVICE_FILES = {'languages'}
+
+
 def locales():
-    return sorted(p.stem for p in CONTENT.glob('*.json') if not p.stem.startswith('_'))
+    return sorted(p.stem for p in CONTENT.glob('*.json')
+                  if not p.stem.startswith('_') and p.stem not in SERVICE_FILES)
 
 
 def render(tpl, data, lang):
@@ -302,8 +309,8 @@ def cmd_import_locales(args):
             print(f'  {code}: УДАЛЁН')
     # WHY: имена новых языков нужны переключателю — иначе он покажет голый код
     names = {c: i.get('name') for c, i in langs.items() if i.get('name')}
-    (ROOT / 'content' / '_languages.json').write_text(
-        json.dumps(names, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    (CONTENT / 'languages.json').write_text(
+        json.dumps({'languages': names}, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print('состав языков:', ', '.join(sorted(langs)))
     return 0
 
