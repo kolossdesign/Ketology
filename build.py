@@ -27,6 +27,10 @@ TODO = 'TODO: '
 
 LANG_NAMES = {'ru': 'Русский', 'en': 'English', 'de': 'Deutsch',
               'fr': 'Français', 'pl': 'Polski'}
+# куда редактор пишет правки: исходный репозиторий и тот, что отдаёт GitHub Pages
+REPOS = [{'repo': 'kolossdesign/Ketology', 'dir': 'content/'},
+         {'repo': 'kolossdesign/sw-prototypes', 'dir': 'ketology/content/'}]
+
 _names_file = pathlib.Path(__file__).parent / 'content' / '_languages.json'
 if _names_file.exists():
     LANG_NAMES.update(json.loads(_names_file.read_text(encoding='utf-8')))
@@ -221,7 +225,7 @@ def cmd_build(args):
                              lang_switcher(lang, langs, data.get('_draft', False)) + ecom('header'))
                     .replace('<!--ECOM_FOOTER-->', ecom('footer')))
         (out / 'index.html').write_text(
-            rebase(editor.build_page(view, lang, data, tpl, all_data, LANG_NAMES), base),
+            rebase(editor.build_page(view, lang, data, tpl, all_data, LANG_NAMES, REPOS), base),
             encoding='utf-8')
 
         status = 'ok'
@@ -231,6 +235,17 @@ def cmd_build(args):
         elif todo:
             status = f'непереведено: {len(todo)}'
         print(f'  {lang}: {status}{"; лишние ключи: " + ", ".join(extra) if extra else ""}')
+
+    # WHY: тексты публикуем рядом с сайтом. Тогда страница читает их в рантайме,
+    # и правка, сохранённая в репозиторий, видна всем БЕЗ пересборки вручную.
+    cdir = DIST / 'content'
+    cdir.mkdir(parents=True, exist_ok=True)
+    for lang in langs:
+        (cdir / f'{lang}.json').write_text(
+            json.dumps(all_data[lang], ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    (cdir / '_index.json').write_text(
+        json.dumps({'languages': {l: LANG_NAMES.get(l, l.upper()) for l in langs}},
+                   ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
     # WHY: страница верхнего уровня — редирект на ru. GitHub Pages статичен,
     # серверного language negotiation нет, поэтому это meta-refresh.

@@ -6026,6 +6026,7 @@ var LOCALES = {"de": {"meta.lang": "de", "meta.title": "Ketology — veganer Sha
 var LANG_NAMES = {"ru": "Русский", "en": "English", "de": "Deutsch", "fr": "Français", "pl": "Polski"};
 var HIDDEN = ["meta.title", "meta.description", "hero.alt_1", "hero.alt_2", "composition.alt_1", "nutrients.alt_1", "compare.arialabel_1", "compare.arialabel_2", "compare.arialabel_3", "compare.arialabel_4", "compare.arialabel_5", "compare.arialabel_6", "compare.arialabel_7", "compare.arialabel_8", "flavors.alt_1", "flavors.alt_2", "flavors.alt_3", "expert.alt_1", "quality.alt_1", "quality.alt_2", "quality.alt_3", "quality.alt_4", "cta.alt_1", "compare.mobile_ketology", "compare.mobile_diet"];
 var CURRENT = "en";
+var REPOS = [{"repo": "kolossdesign/Ketology", "dir": "content/"}, {"repo": "kolossdesign/sw-prototypes", "dir": "ketology/content/"}];
 
 (function () {
   var STORE = 'ketology-locales';
@@ -6036,7 +6037,27 @@ var CURRENT = "en";
     var raw = JSON.parse(localStorage.getItem(STORE) || 'null');
     if (raw && raw.locales) state = raw;
   } catch (e) {}
-  function save() { localStorage.setItem(STORE, JSON.stringify(state)); }
+  function save() {
+    state.dirty = true;
+    localStorage.setItem(STORE, JSON.stringify(state));
+    updateStatus();
+  }
+
+  function pending() {
+    return !!state.dirty && !!(Object.keys(state.locales).length || state.removed.length);
+  }
+
+  function updateStatus() {
+    var el = bar && bar.querySelector('.lp-status');
+    if (!el) return;
+    el.textContent = pending() ? '● есть несохранённые правки' : '✓ всё сохранено в проект';
+    el.style.color = pending() ? '#FFD600' : '#8ede9a';
+  }
+
+  // WHY: главный риск — закрыть вкладку и потерять работу. Браузер переспросит.
+  window.addEventListener('beforeunload', function (e) {
+    if (pending()) { e.preventDefault(); e.returnValue = ''; }
+  });
 
   function names() {
     var out = {};
@@ -6156,15 +6177,119 @@ var CURRENT = "en";
     return JSON.stringify(out, null, 2) + '\n';
   }
 
+  // ── сохранение в репозиторий ────────────────────────────────────────────────
+  // WHY: страница статическая, сервера нет. Единственный способ сделать правку
+  // настоящей — записать файлы через GitHub API. Токен вводится один раз и
+  // лежит ТОЛЬКО в этом браузере: в репозиторий он не попадает никогда.
+  function token(force) {
+    var t = localStorage.getItem('ketology-gh-token');
+    if (!t || force) {
+      t = (prompt('GitHub-токен с правом записи в ' + REPOS[0].repo +
+                  '\n(сохранится только в этом браузере)') || '').trim();
+      if (!t) return null;
+      localStorage.setItem('ketology-gh-token', t);
+    }
+    return t;
+  }
+
+  function gh(tok, method, repo, path, body) {
+    var url = 'https://api.github.com/repos/' + repo + '/contents/' + path;
+    var opt = {method: method, headers: {Authorization: 'token ' + tok,
+               Accept: 'application/vnd.github+json'}};
+    if (body) { opt.body = JSON.stringify(body); }
+    return fetch(url, opt);
+  }
+
+  function shaOf(tok, repo, path) {
+    return gh(tok, 'GET', repo, path + '?ref=HEAD')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return j && j.sha; })
+      .catch(function () { return null; });
+  }
+
+  function b64(str) {
+    return btoa(new Uint8Array(new TextEncoder().encode(str))
+      .reduce(function (a, c) { return a + String.fromCharCode(c); }, ''));
+  }
+
+  function writeFile(tok, repo, path, text, msg) {
+    return shaOf(tok, repo, path).then(function (sha) {
+      var body = {message: msg, content: b64(text)};
+      if (sha) body.sha = sha;
+      return gh(tok, 'PUT', repo, path, body).then(function (r) {
+        if (!r.ok) return r.text().then(function (t) { throw new Error(path + ': ' + t.slice(0, 120)); });
+      });
+    });
+  }
+
+  function deleteFile(tok, repo, path, msg) {
+    return shaOf(tok, repo, path).then(function (sha) {
+      if (!sha) return;
+      return gh(tok, 'DELETE', repo, path, {message: msg, sha: sha});
+    });
+  }
+
+  function publish(btn) {
+    var tok = token(false);
+    if (!tok) return;
+    var nm = names(), codes = Object.keys(nm);
+    var label = btn.textContent;
+    btn.textContent = 'Сохраняю…';
+    btn.disabled = true;
+
+    var jobs = [];
+    REPOS.forEach(function (r) {
+      codes.forEach(function (c) {
+        jobs.push([r.repo, r.dir + c + '.json',
+                   JSON.stringify(dataOf(c), null, 2) + '\n']);
+      });
+      jobs.push([r.repo, r.dir + '_index.json',
+                 JSON.stringify({languages: nm}, null, 2) + '\n']);
+    });
+
+    var chain = Promise.resolve();
+    jobs.forEach(function (j) {
+      chain = chain.then(function () {
+        return writeFile(tok, j[0], j[1], j[2], 'ketology: правка текстов из редактора');
+      });
+    });
+    (state.removed || []).forEach(function (c) {
+      REPOS.forEach(function (r) {
+        chain = chain.then(function () {
+          return deleteFile(tok, r.repo, r.dir + c + '.json', 'ketology: язык ' + c + ' удалён');
+        });
+      });
+    });
+
+    chain.then(function () {
+      state.dirty = false;
+      localStorage.setItem(STORE, JSON.stringify(state));
+      btn.textContent = 'Сохранено ✓';
+      updateStatus();
+      setTimeout(function () { btn.textContent = label; btn.disabled = false; }, 2000);
+    }).catch(function (err) {
+      btn.textContent = label;
+      btn.disabled = false;
+      if (String(err).indexOf('401') > -1 || String(err).indexOf('Bad credentials') > -1) {
+        localStorage.removeItem('ketology-gh-token');
+        alert('Токен не подошёл. Нажмите «Сохранить в проект» ещё раз и введите новый.');
+      } else {
+        alert('Не сохранилось: ' + err.message);
+      }
+    });
+  }
+
   bar = document.createElement('div');
   bar.id = 'lp-bar';
   bar.innerHTML =
     '<div class="lp-row lp-langs"></div>' +
     '<div class="lp-row">' +
-      '<span class="lp-count">изменений нет</span><span class="sp"></span>' +
+      '<span class="lp-count">изменений нет</span>' +
+      '<span class="lp-status"></span><span class="sp"></span>' +
       '<button data-act="hidden">Скрытые строки (' + HIDDEN.length + ')</button>' +
       '<button data-act="one">Скачать текущий язык</button>' +
-      '<button data-act="all" class="primary">Скачать все языки</button>' +
+      '<button data-act="all">Скачать все языки</button>' +
+      '<button data-act="publish" class="primary">Сохранить в проект</button>' +
       '<button data-act="reset">Сбросить правки</button>' +
     '</div><div id="lp-hidden" hidden></div>';
   document.body.appendChild(bar);
@@ -6199,6 +6324,7 @@ var CURRENT = "en";
     if (act === 'one') return download(current + '.json',
                                        JSON.stringify(dataOf(current), null, 2) + '\n');
     if (act === 'all') return download('locales.json', bundle());
+    if (act === 'publish') return publish(t);
     if (act === 'reset') {
       if (!confirm('Вернуть исходные тексты и языки? Все правки в браузере пропадут.')) return;
       localStorage.removeItem(STORE);
@@ -6206,8 +6332,32 @@ var CURRENT = "en";
     }
   });
 
-  var want = new URLSearchParams(location.search).get('lang');
-  apply(want && names()[want] ? want : (names()[CURRENT] ? CURRENT : Object.keys(names())[0]));
+  // WHY: тексты лежат рядом с сайтом в content/*.json и читаются в рантайме —
+  // тогда сохранённая правка видна всем сразу, без пересборки страницы.
+  function boot() {
+    var want = new URLSearchParams(location.search).get('lang');
+    apply(want && names()[want] ? want : (names()[CURRENT] ? CURRENT : Object.keys(names())[0]));
+    updateStatus();
+  }
+
+  fetch('../content/_index.json', {cache: 'no-store'})
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (idx) {
+      if (!idx) return null;
+      var codes = Object.keys(idx.languages || {});
+      codes.forEach(function (c) { LANG_NAMES[c] = idx.languages[c]; });
+      return Promise.all(codes.map(function (c) {
+        return fetch('../content/' + c + '.json', {cache: 'no-store'})
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { if (d) LOCALES[c] = d; });
+      })).then(function () {
+        Object.keys(LOCALES).forEach(function (c) {
+          if (codes.indexOf(c) === -1) delete LOCALES[c];
+        });
+      });
+    })
+    .catch(function () {})
+    .then(boot);
 })();
 </script>
 </body>
