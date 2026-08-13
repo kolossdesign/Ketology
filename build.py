@@ -14,6 +14,8 @@
 """
 import argparse, json, pathlib, re, sys
 
+import editor
+
 ROOT = pathlib.Path(__file__).parent
 TEMPLATE = ROOT / 'src' / 'template.html'
 CONTENT = ROOT / 'content'
@@ -22,7 +24,8 @@ PLACEHOLDER = re.compile(r'\{\{([\w.]+)\}\}')
 TODO = 'TODO: '
 
 
-LANG_NAMES = {'ru': 'Русский', 'en': 'English', 'de': 'Deutsch', 'pl': 'Polski'}
+LANG_NAMES = {'ru': 'Русский', 'en': 'English', 'de': 'Deutsch',
+              'fr': 'Français', 'pl': 'Polski'}
 
 
 def load(lang):
@@ -35,16 +38,19 @@ def ecom(part):
     return p.read_text(encoding='utf-8') if p.exists() else ''
 
 
-def lang_switcher(current, langs, draft=False):
+def lang_switcher(current, langs, draft=False, edit=False):
     """Переключатель языков — только для превью, в еком-фрагмент не попадает."""
     mark = ('<b class="lp-draft">черновой перевод — заменить на перевод от переводчиков</b>'
             if draft else '')
+    page = 'edit.html' if edit else ''
     items = ''.join(
-        f'<a href="../{l}/" class="{"is-active" if l == current else ""}">{LANG_NAMES.get(l, l)}</a>'
+        f'<a href="../{l}/{page}" class="{"is-active" if l == current else ""}">'
+        f'{LANG_NAMES.get(l, l)}</a>'
         for l in langs)
     return (
         '<div class="lp-langbar">'
-        '<span>Превью лендинга Ketology — язык:</span>' + items + mark +
+        '<span>Превью лендинга Ketology — язык:</span>' + items +
+        '<a class="lp-edit-link" href="edit.html">✏ Редактировать тексты</a>' + mark +
         '</div>'
         '<style>'
         '.lp-langbar{position:sticky;top:0;z-index:9999;display:flex;gap:14px;align-items:center;'
@@ -52,6 +58,8 @@ def lang_switcher(current, langs, draft=False):
         '.lp-langbar a{color:#fff;opacity:.6;text-decoration:none;border-bottom:1px solid transparent}'
         '.lp-langbar a:hover{opacity:1}'
         '.lp-langbar a.is-active{opacity:1;font-weight:600;border-bottom-color:#EE4729}'
+        '.lp-langbar .lp-edit-link{opacity:1;border:1px solid #555;border-radius:6px;'
+        'padding:3px 10px;margin-left:12px}'
         '.lp-draft{margin-left:auto;background:#EE4729;color:#fff;font-weight:600;'
         'padding:4px 10px;border-radius:4px}'
         # WHY: шапка и подвал в превью — макет чужого сайта. Клики по ним гасим,
@@ -213,6 +221,18 @@ def cmd_build(args):
         base = args.base or '../../'
         (out / 'index.html').write_text(rebase(page_std, base), encoding='utf-8')
         (out / 'fragment.html').write_text(rebase(to_fragment(page, lang), base), encoding='utf-8')
+
+        # WHY: редактор — отдельная страница, чтобы боевой index.html оставался чистым:
+        # ни contenteditable, ни лишнего JS в том, что уедет в еком.
+        edit = editor.render_editable(tpl, data, lang)
+        edit = (edit.replace('<!--ECOM_CSS-->', ecom('css'))
+                    .replace('<!--ECOM_HEADER-->',
+                             lang_switcher(lang, langs, data.get('_draft', False), edit=True)
+                             .replace('href="edit.html"', 'href="index.html"')
+                             .replace('✏ Редактировать тексты', '← Обычный просмотр') + ecom('header'))
+                    .replace('<!--ECOM_FOOTER-->', ecom('footer')))
+        (out / 'edit.html').write_text(
+            rebase(editor.build_edit_page(edit, lang, data, tpl), base), encoding='utf-8')
         status = 'ok'
         if missing:
             status = f'НЕТ КЛЮЧЕЙ: {len(missing)} ({", ".join(missing[:3])}…)'
