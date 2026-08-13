@@ -82,13 +82,6 @@ x-t:focus{outline:none}
 .lp-lang button.on{background:#EE4729;font-weight:600}
 .lp-lang .del{padding:6px 8px;background:#222;color:#ff8f78;border-left:1px solid #555}
 .lp-lang .del:hover{background:#402020}
-#lp-hidden{max-height:40vh;overflow:auto;background:#1f1f1f;padding:12px 16px}
-#lp-hidden p{margin:0 0 10px;opacity:.7}
-#lp-hidden label{display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;
-  margin-bottom:7px}
-#lp-hidden span{opacity:.6;font-family:ui-monospace,monospace;font-size:12px}
-#lp-hidden input{font:inherit;padding:6px 10px;border-radius:6px;border:1px solid #444;
-  background:#111;color:#fff}
 .lp-status{font-weight:600}
 body{padding-bottom:110px}
 '''
@@ -96,7 +89,7 @@ body{padding-bottom:110px}
 JS = r'''
 (function () {
   var STORE = 'ketology-locales';
-  var bar, hiddenBox, current = CURRENT;
+  var bar, current = CURRENT;
 
   var state = {locales: {}, removed: []};
   try {
@@ -243,7 +236,6 @@ JS = r'''
     u.searchParams.set('lang', code);
     history.replaceState(null, '', u);
     renderLangs();
-    fillHidden();
     markAll();
   }
 
@@ -261,6 +253,14 @@ JS = r'''
       if (e.key === 'Enter') { e.preventDefault(); document.execCommand('insertHTML', false, '<br>'); }
       if (e.key === 'Escape') n.blur();
     });
+    // WHY: текст кнопок лежит внутри <a>. Клик по нему уходил в переход по ссылке,
+    // курсор не вставал, и правка молча не сохранялась. Гасим переход и ставим курсор.
+    var link = n.parentElement && n.parentElement.closest('a');
+    if (link) {
+      link.setAttribute('draggable', 'false');
+      link.addEventListener('click', function (e) { e.preventDefault(); });
+      n.addEventListener('mousedown', function () { setTimeout(function () { n.focus(); }, 0); });
+    }
     n.addEventListener('blur', function () {          // сохраняем по снятию фокуса
       put(n.dataset.k, clean(n.innerHTML));
       markAll();
@@ -275,18 +275,6 @@ JS = r'''
         (codes.length > 1 ? '<button class="del" data-del="' + c + '" title="Удалить язык">×</button>' : '') +
         '</span>';
     }).join('') + '<button data-act="add">+ Добавить язык</button>';
-  }
-
-  function fillHidden() {
-    var d = dataOf(current);
-    hiddenBox.innerHTML = '<p>Этих строк на странице не видно — их читают поисковики ' +
-      'и программы для незрячих.</p>' + HIDDEN.map(function (k) {
-        return '<label><span>' + k + '</span><input data-hk="' + k + '" value="' +
-          String(d[k] == null ? '' : d[k]).replace(/"/g, '&quot;') + '"></label>';
-      }).join('');
-    hiddenBox.querySelectorAll('[data-hk]').forEach(function (i) {
-      i.addEventListener('blur', function () { put(i.dataset.hk, i.value); });
-    });
   }
 
   function download(name, text) {
@@ -446,13 +434,10 @@ JS = r'''
       '<button data-act="publish" class="primary">Сохранить</button>' +
       '<button data-act="reset">Сбросить правки</button>' +
       '<span class="sp"></span>' +
-      '<button data-act="hidden" title="Заголовок для поисковика, описание ' +
-      'и подписи картинок — на странице их не видно">Тексты для поиска (' + HIDDEN.length + ')</button>' +
       '<button data-act="one">Скачать язык</button>' +
       '<button data-act="all">Скачать все</button>' +
-    '</div><div id="lp-hidden" hidden></div>';
+    '</div>';
   document.body.appendChild(bar);
-  hiddenBox = bar.querySelector('#lp-hidden');
 
   bar.addEventListener('click', function (e) {
     var t = e.target, act = t.dataset.act;
@@ -476,7 +461,6 @@ JS = r'''
       apply(code);
       return;
     }
-    if (act === 'hidden') { hiddenBox.hidden = !hiddenBox.hidden; return; }
     if (act === 'one') return download(current + '.json',
                                        JSON.stringify(dataOf(current), null, 2) + '\n');
     if (act === 'all') return download('locales.json', bundle());
@@ -523,11 +507,10 @@ JS = r'''
 def build_page(page_html, lang, data, tpl, all_locales, lang_names, repos):
     """Страница-превью, в которой правятся и тексты, и состав языков."""
     head = ('var ORDER = %s;\nvar LOCALES = %s;\nvar LANG_NAMES = %s;\n'
-            'var HIDDEN = %s;\nvar CURRENT = %s;\nvar REPOS = %s;\n' % (
+            'var CURRENT = %s;\nvar REPOS = %s;\n' % (
                 json.dumps(list(data), ensure_ascii=False),
                 json.dumps(all_locales, ensure_ascii=False),
                 json.dumps(lang_names, ensure_ascii=False),
-                json.dumps(hidden_keys(tpl, data), ensure_ascii=False),
                 json.dumps(lang, ensure_ascii=False),
                 json.dumps(repos, ensure_ascii=False)))
     return page_html.replace(
