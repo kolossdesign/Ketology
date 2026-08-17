@@ -42,11 +42,15 @@ jobs:
       - name: Собрать
         run: python3 build.py build --base https://kolossdesign.github.io/Ketology/
 
+      - name: Собрать мокап программы лояльности
+        run: python3 loyalty/build.py
+
       - name: Сложить сайт
         run: |
           rm -rf _site && mkdir -p _site
           cp -r dist/* _site/
           cp -r assets _site/assets
+          mkdir -p _site/loyalty && cp loyalty/index.html _site/loyalty/
           touch _site/.nojekyll
 
       # WHY: включить Pages впервые workflow не может — GitHub запрещает это
