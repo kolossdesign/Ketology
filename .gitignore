@@ -1,4 +1,3 @@
 # Собирается из src/ и content/ — в репозитории не нужен.
 # Сайт публикуется артефактом GitHub Actions, см. .github/workflows/build.yml
 dist/
-loyalty/index.html
