@@ -13,7 +13,7 @@
   dist/<lang>/index.html     — самостоятельная страница (для превью и GitHub Pages)
   dist/<lang>/fragment.html  — <style> + <main> без шапки/подвала, это вставляется в еком
 """
-import argparse, json, pathlib, re, sys
+import argparse, json, pathlib, re, shutil, sys
 
 import editor
 
@@ -196,6 +196,10 @@ def cmd_build(args):
     ref = load('ru')
     langs = locales()
     all_data = {l: load(l) for l in langs}
+    # WHY: чистим dist перед сборкой. Иначе файлы удалённых языков и артефакты
+    # прошлых версий остаются лежать и уезжают в публикацию.
+    if DIST.exists():
+        shutil.rmtree(DIST)
     ok = True
     for lang in langs:
         data = load(lang)
@@ -222,6 +226,8 @@ def cmd_build(args):
         (out / 'index.html').write_text(
             rebase(editor.build_page(view, lang, data, tpl, all_data, LANG_NAMES, REPOS), base),
             encoding='utf-8')
+        # то, что вставляется в еком: без шапки, подвала и редактора
+        (out / 'fragment.html').write_text(rebase(to_fragment(page, lang), base), encoding='utf-8')
 
         status = 'ok'
         if missing:
