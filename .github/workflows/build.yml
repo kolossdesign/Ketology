@@ -1,17 +1,22 @@
-name: Публикация снята
+name: Сборка и публикация лендинга
 
-# WHY: заказчик попросил убрать проект с прода. Сайт Pages нельзя выключить
-# токеном Actions, поэтому публикуем ПУСТУЮ выкладку — все прежние адреса
-# начинают отдавать 404. Исходники и история остаются в репозитории.
-# Чтобы выключить Pages совсем: Settings → Pages → Source: None.
-
+# WHY: редактор пишет только content/*.json. Всё остальное — страницы, фрагмент
+# для екома, копия текстов рядом с сайтом — собирается здесь, чтобы человеку
+# не нужно было ничего пересобирать руками.
 on:
   push:
     branches: [main]
+    paths:
+      - 'content/**'
+      - 'src/**'
+      - 'assets/**'
+      - 'build.py'
+      - 'editor.py'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -22,18 +27,54 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      pages: ${{ steps.pages.outcome }}
     steps:
-      - name: Пустой сайт
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Проверить локали
+        run: python3 build.py check
+
+      - name: Собрать
+        run: python3 build.py build --base https://kolossdesign.github.io/Ketology/
+
+      - name: Собрать мокап программы лояльности
+        run: python3 loyalty/build.py
+
+      - name: Сложить сайт
         run: |
           rm -rf _site && mkdir -p _site
+          cp -r dist/* _site/
+          cp -r assets _site/assets
+          mkdir -p _site/loyalty && cp loyalty/index.html _site/loyalty/
           touch _site/.nojekyll
-      - uses: actions/configure-pages@v5
+
+      # WHY: включить Pages впервые workflow не может — GitHub запрещает это
+      # токену Actions. Пока владелец не переключит Settings → Pages → Source:
+      # GitHub Actions, шаги публикации пропускаются, а сборка остаётся зелёной:
+      # свежий dist в любом случае лежит в репозитории.
+      - id: pages
+        uses: actions/configure-pages@v5
+        continue-on-error: true
+
       - uses: actions/upload-pages-artifact@v3
+        if: steps.pages.outcome == 'success'
         with:
           path: _site
 
+      - name: Подсказка, если Pages не включён
+        if: steps.pages.outcome != 'success'
+        run: |
+          echo "::warning::Pages не включён. Settings → Pages → Source: GitHub Actions —"
+          echo "::warning::после этого сайт будет публиковаться автоматически."
+
   deploy:
     needs: build
+    if: needs.build.outputs.pages == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
