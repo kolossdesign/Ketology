@@ -369,129 +369,94 @@ JS = r'''
     say._t = setTimeout(updateStatus, 6000);
   }
 
-  function gh(tok, method, repo, path, body) {
-    var url = 'https://api.github.com/repos/' + repo + '/contents/' + path;
-    // WHY: cache:'no-store' обязателен. Браузер отдавал закэшированный ответ
-    // со старой версией файла, GitHub отвечал «does not match <sha>»
-    // и сохранение падало на втором заходе.
+  function api(tok, method, repo, path, body) {
+    // WHY: cache:'no-store' обязателен — браузер отдавал закэшированный ответ
+    // со старой версией файла, и GitHub отвечал «does not match <sha>».
     var opt = {method: method, cache: 'no-store',
                headers: {Authorization: 'token ' + tok,
                          Accept: 'application/vnd.github+json'}};
-    if (body) { opt.body = JSON.stringify(body); }
-    return fetch(url, opt);
-  }
-
-  function shaOf(tok, repo, path) {
-    return gh(tok, 'GET', repo, path + '?ref=HEAD&t=' + Date.now())
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { return j && j.sha; })
-      .catch(function () { return null; });
-  }
-
-  function b64(str) {
-    return btoa(new Uint8Array(new TextEncoder().encode(str))
-      .reduce(function (a, c) { return a + String.fromCharCode(c); }, ''));
-  }
-
-  function writeFile(tok, repo, path, text, msg, retry) {
-    return shaOf(tok, repo, path).then(function (sha) {
-      var body = {message: msg, content: b64(text)};
-      if (sha) body.sha = sha;
-      return gh(tok, 'PUT', repo, path, body).then(function (r) {
-        if (r.ok) return;
-        return r.text().then(function (t) {
-          // WHY: файл успели поменять между чтением версии и записью —
-          // перечитываем и пробуем ещё раз, вместо ошибки в лицо человеку.
-          if (!retry && (r.status === 409 || t.indexOf('does not match') > -1)) {
-            return writeFile(tok, repo, path, text, msg, true);
-          }
-          throw new Error(path + ': ' + t.slice(0, 120));
-        });
-      });
-    });
-  }
-
-  function deleteFile(tok, repo, path, msg) {
-    return shaOf(tok, repo, path).then(function (sha) {
-      if (!sha) return;
-      return gh(tok, 'DELETE', repo, path, {message: msg, sha: sha});
+    if (body) opt.body = JSON.stringify(body);
+    return fetch('https://api.github.com/repos/' + repo + path, opt).then(function (r) {
+      if (r.ok) return r.status === 204 ? null : r.json();
+      return r.text().then(function (t) { throw new Error(r.status + ': ' + t.slice(0, 140)); });
     });
   }
 
   function publish(btn) {
     var tok = token();
     if (!tok) return;
-    var nm = names(), codes = Object.keys(nm);
+    var nm = names(), codes = Object.keys(nm), repo = REPOS[0].repo, dir = REPOS[0].dir;
     var label = btn.textContent;
     btn.textContent = 'Сохраняю…';
     btn.disabled = true;
 
-    var jobs = [];
-    REPOS.forEach(function (r) {
-      codes.forEach(function (c) {
-        jobs.push([r.repo, r.dir + c + '.json',
-                   JSON.stringify(dataOf(c), null, 2) + '\n']);
-      });
-      jobs.push([r.repo, r.dir + 'languages.json',
-                 JSON.stringify({languages: nm}, null, 2) + '\n']);
+    // WHY: раньше каждый файл писался отдельным вызовом — пять коммитов на одно
+    // сохранение, пять сборок, и на последний коммит сборка иногда не запускалась.
+    // Здесь один коммит на всё: дерево → коммит → перевод ветки.
+    var files = codes.map(function (c) {
+      return {path: dir + c + '.json', mode: '100644', type: 'blob',
+              content: JSON.stringify(dataOf(c), null, 2) + '\n'};
     });
-
-    // WHY: сначала одна дешёвая проверка доступа. Иначе половина файлов
-    // записалась бы, а на середине вылезла ошибка прав.
-    var chain = fetch('https://api.github.com/repos/' + REPOS[0].repo, {
-      headers: {Authorization: 'token ' + tok, Accept: 'application/vnd.github+json'}
-    }).then(function (r) {
-      if (r.status === 401) throw new Error('Bad credentials');
-      if (r.status === 404) throw new Error('Not Found');
-      return r.json();
-    }).then(function (repo) {
-      if (!repo.permissions || !repo.permissions.push) throw new Error('not accessible: нет права записи');
-    });
-    jobs.forEach(function (j) {
-      chain = chain.then(function () {
-        return writeFile(tok, j[0], j[1], j[2], 'ketology: правка текстов из редактора');
-      });
-    });
+    files.push({path: dir + 'languages.json', mode: '100644', type: 'blob',
+                content: JSON.stringify({languages: nm}, null, 2) + '\n'});
     (state.removed || []).forEach(function (c) {
-      REPOS.forEach(function (r) {
-        chain = chain.then(function () {
-          return deleteFile(tok, r.repo, r.dir + c + '.json', 'ketology: язык ' + c + ' удалён');
-        });
-      });
+      files.push({path: dir + c + '.json', mode: '100644', type: 'blob', sha: null});
     });
 
-    chain.then(function () {
-      // WHY: после записи опубликованной версией считается то, что записали.
-      // Иначе прежние правки навсегда оставались бы «несохранёнными».
-      codes.forEach(function (c) { LOCALES[c] = dataOf(c); });
-      (state.removed || []).forEach(function (c) { delete LOCALES[c]; });
-      state.locales = {};
-      state.removed = [];
-      localStorage.setItem(STORE, JSON.stringify(state));
-      btn.textContent = 'Сохранено ✓';
-      // WHY: возвращаем подпись, а состояние кнопки отдаём updateStatus —
-      // иначе она включалась обратно, хотя сохранять уже нечего.
-      setTimeout(function () { btn.textContent = label; updateStatus(); }, 2000);
-    }).catch(function (err) {
-      btn.textContent = label;
-      btn.disabled = false;
-      setTimeout(updateStatus, 6100);
-      var m = String(err.message || err);
-      if (m.indexOf('Bad credentials') > -1 || m.indexOf('401') > -1) {
-        localStorage.removeItem('ketology-gh-token');
-        say('Токен не подошёл — нажмите «Сохранить» и введите новый.', true);
-      } else if (m.indexOf('Not Found') > -1 || m.indexOf('404') > -1) {
-        localStorage.removeItem('ketology-gh-token');
-        say('Токен не видит репозиторий. В настройках токена: Repository access → ' +
-            REPOS[0].repo + '.', true);
-      } else if (m.indexOf('not accessible') > -1 || m.indexOf('403') > -1) {
-        say('У токена нет права записи. Нужно Permissions → Contents: Read and write.', true);
-      } else if (m.indexOf('does not match') > -1 || m.indexOf('409') > -1) {
-        say('Файл успели изменить с другой стороны. Нажмите «Сохранить» ещё раз.', true);
-      } else {
-        say('Не сохранилось: ' + m.slice(0, 120), true);
-      }
-    });
+    var head;
+    api(tok, 'GET', repo, '')
+      .then(function (info) {
+        if (!info.permissions || !info.permissions.push) {
+          throw new Error('403: нет права записи');
+        }
+        return api(tok, 'GET', repo, '/git/ref/heads/' + (info.default_branch || 'main'));
+      })
+      .then(function (ref) {
+        head = ref;
+        return api(tok, 'GET', repo, '/git/commits/' + ref.object.sha);
+      })
+      .then(function (commit) {
+        return api(tok, 'POST', repo, '/git/trees',
+                   {base_tree: commit.tree.sha, tree: files});
+      })
+      .then(function (tree) {
+        return api(tok, 'POST', repo, '/git/commits', {
+          message: 'ketology: правка текстов из редактора',
+          tree: tree.sha, parents: [head.object.sha]});
+      })
+      .then(function (commit) {
+        return api(tok, 'PATCH', repo, '/git/' + head.ref, {sha: commit.sha});
+      })
+      .then(function () {
+        // опубликованной версией теперь считается то, что записали
+        codes.forEach(function (c) { LOCALES[c] = dataOf(c); });
+        (state.removed || []).forEach(function (c) { delete LOCALES[c]; });
+        state.locales = {};
+        state.removed = [];
+        localStorage.setItem(STORE, JSON.stringify(state));
+        btn.textContent = 'Сохранено ✓';
+        setTimeout(function () { btn.textContent = label; updateStatus(); }, 2000);
+      })
+      .catch(function (err) {
+        btn.textContent = label;
+        btn.disabled = false;
+        setTimeout(updateStatus, 6100);
+        var m = String(err.message || err);
+        if (m.indexOf('401') > -1 || m.indexOf('Bad credentials') > -1) {
+          localStorage.removeItem('ketology-gh-token');
+          say('Токен не подошёл — нажмите «Сохранить» и введите новый.', true);
+        } else if (m.indexOf('404') > -1) {
+          localStorage.removeItem('ketology-gh-token');
+          say('Токен не видит репозиторий. В настройках токена: Repository access → ' +
+              repo + '.', true);
+        } else if (m.indexOf('403') > -1) {
+          say('У токена нет права записи. Нужно Permissions → Contents: Read and write.', true);
+        } else if (m.indexOf('409') > -1 || m.indexOf('not a fast forward') > -1) {
+          say('Кто-то менял тексты параллельно. Обновите страницу и сохраните ещё раз.', true);
+        } else {
+          say('Не сохранилось: ' + m.slice(0, 120), true);
+        }
+      });
   }
 
   bar = document.createElement('div');
