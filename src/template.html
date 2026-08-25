@@ -254,9 +254,12 @@ blockquote{margin:0}
   /* Полоса держит пропорцию, снимок разложен в процентах от неё. height:auto
      обязателен — иначе от атрибута height остаётся 865px и снимок растягивает. */
   .nutri__media{position:relative;left:auto;top:auto;transform:none;
-    width:100%;height:auto;aspect-ratio:100/76;margin-top:0}
+    width:100%;height:auto;aspect-ratio:100/97;margin-top:0}
   .nutri__media img{position:absolute;height:auto;max-width:none}
-  .nutri__media .scene{width:104%;left:-7%;top:0}
+  /* WHY: слева у снимка 18,5% прозрачного поля (непрозрачная область начинается
+     с 383px из 2072). Сдвигаем на эту долю, чтобы сцена упёрлась в левый край
+     экрана, а не висела с зазором; справа кадр уходит за край, как на десктопе. */
+  .nutri__media .scene{width:130%;left:-24%;top:0}
   .nutri__spot{display:none}
   .tasks{grid-template-columns:1fr 1fr;grid-template-rows:none}
   .task--tall{grid-row:span 1;min-height:420px}
