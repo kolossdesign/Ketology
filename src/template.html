@@ -121,7 +121,7 @@ blockquote{margin:0}
 .nutri__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px 16px;max-width:631px}
 .stat{display:flex;flex-direction:column;gap:4px}
 .stat__v{font-size:54px;line-height:65px;font-weight:500;letter-spacing:-1.62px}
-.stat__v span{font-size:32px;line-height:39px;letter-spacing:-.96px}
+.stat__v span{font-size:32px;line-height:39px;letter-spacing:-.96px;margin-left:4px}
 .stat__l{font-size:20px;line-height:27px;font-weight:300}
 .nutri__foot{display:flex;gap:4px;font-size:14px;line-height:19px;font-weight:300;max-width:470px}
 /* WHY: снимки намеренно выходят за края блока — так они стоят в макете.
@@ -236,9 +236,10 @@ blockquote{margin:0}
 .cta__lead{max-width:277px}
 
 /* ── Адаптив ───────────────────────────────────────────────────────────────── */
-@media (max-width:1200px){
+@media (max-width:1023px){
   .pad{padding-inline:20px}
-  .mct,.cta,.expert{grid-template-columns:1fr;gap:32px}
+  .mct,.cta,.expert__slide{grid-template-columns:1fr;gap:32px}
+  .expert__body{min-height:0}
   .hero__inner{padding:48px 20px;gap:32px}
   .quality{grid-template-columns:1fr;gap:40px}
   .nutri{flex-direction:column;align-items:stretch;padding:48px 40px;min-height:0}
