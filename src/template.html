@@ -124,13 +124,12 @@ blockquote{margin:0}
 .stat__v span{font-size:32px;line-height:39px;letter-spacing:-.96px;margin-left:4px}
 .stat__l{font-size:20px;line-height:27px;font-weight:300}
 .nutri__foot{display:flex;gap:4px;font-size:14px;line-height:19px;font-weight:300;max-width:470px}
-/* WHY: снимки намеренно выходят за края блока — так они стоят в макете.
+/* WHY: снимок намеренно выходит за края блока — так он стоит в макете (нода 979:711).
    Контейнер повторяет холст 1440, поэтому координаты берутся прямо из Figma. */
 .nutri__media{position:absolute;z-index:1;left:50%;top:0;transform:translateX(-50%);
   width:1440px;height:100%;pointer-events:none}
 .nutri__media img{position:absolute;width:auto;max-width:none}
-.nutri__media .bottom{left:499px;top:373px;width:1233px}
-.nutri__media .top{left:550px;top:-75px;width:1095px}
+.nutri__media .scene{left:608px;top:-70px;width:1036px}
 
 /* ── Сравнение ─────────────────────────────────────────────────────────────── */
 .compare__head{display:grid;grid-template-columns:638fr 325fr 325fr;gap:12px;margin-top:45px;margin-bottom:12px}
@@ -252,14 +251,12 @@ blockquote{margin:0}
       #FFEE95 0%, #FF8475 55%, #D94938 100%)}
   .nutri__inner{padding:48px 20px;gap:32px}
   .nutri__text,.nutri__grid{max-width:none}
-  /* Снимки остаются одной сценой, а не двумя картинками в столбик: полоса держит
-     пропорцию, банка и рука разложены в процентах от неё. height:auto обязателен —
-     иначе от атрибута height остаётся 510px и снимок растягивает по вертикали. */
+  /* Полоса держит пропорцию, снимок разложен в процентах от неё. height:auto
+     обязателен — иначе от атрибута height остаётся 865px и снимок растягивает. */
   .nutri__media{position:relative;left:auto;top:auto;transform:none;
-    width:100%;height:auto;aspect-ratio:390/210;margin-top:8px}
+    width:100%;height:auto;aspect-ratio:100/76;margin-top:0}
   .nutri__media img{position:absolute;height:auto;max-width:none}
-  .nutri__media .bottom{width:104%;left:-6%;top:24%}
-  .nutri__media .top{width:88%;left:24%;top:-4%}
+  .nutri__media .scene{width:104%;left:-7%;top:0}
   .nutri__spot{display:none}
   .tasks{grid-template-columns:1fr 1fr;grid-template-rows:none}
   .task--tall{grid-row:span 1;min-height:420px}
@@ -371,8 +368,7 @@ blockquote{margin:0}
         <p class="nutri__foot"><span>*</span><span>{{nutrients.text_12}}</span></p>
       </div></div>
       <div class="nutri__media" aria-hidden="true">
-        <img class="bottom" src="assets/nutrients-bottom.webp" alt="" width="1233" height="510">
-        <img class="top" src="assets/nutrients-top.webp" alt="" width="1095" height="448">
+        <img class="scene" src="assets/nutrients-scene.webp" alt="" width="1036" height="865">
       </div>
     </div>
   </section>
