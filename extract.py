@@ -28,6 +28,18 @@ src = SRC.read_text(encoding='utf-8')
 head, body = src.split('<body>', 1)
 body = '<body>' + body
 
+# WHY: в скрипте есть операторы сравнения («slides.length < 2»), и токенизатор
+# принимал их за начало тега. Прячем скрипты целиком — переводить там нечего.
+SCRIPTS = []
+
+
+def _hide(m):
+    SCRIPTS.append(m.group(0))
+    return f'@@SCRIPT{len(SCRIPTS) - 1}@@'
+
+
+body = re.sub(r'<script\b.*?</script>', _hide, body, flags=re.S)
+
 section, stack, cnt, content, out = 'page', [], collections.Counter(), {}, []
 
 
@@ -84,6 +96,8 @@ for tok in TOKEN.split(body):
         out.append(tok)
 
 body_t = ''.join(out)
+for i, sc in enumerate(SCRIPTS):
+    body_t = body_t.replace(f'@@SCRIPT{i}@@', sc)
 
 # WHY: в макете заголовки разрезаны переносами строки, и экстрактор делал из одного
 # заголовка 2-3 ключа. Переводчик присылает фразу целиком — класть её некуда.
@@ -117,7 +131,8 @@ data.update(content)
 
 full = head_t + body_t
 ph = set(re.findall(r'\{\{([\w.]+)\}\}', full))
-clean = re.sub(r'/\*.*?\*/', '', re.sub(r'<!--.*?-->', '', full, flags=re.S), flags=re.S)
+clean = re.sub(r'<script\b.*?</script>', '', full, flags=re.S)   # в скриптах переводить нечего
+clean = re.sub(r'/\*.*?\*/', '', re.sub(r'<!--.*?-->', '', clean, flags=re.S), flags=re.S)
 leaks = [l.strip()[:80] for l in clean.splitlines() if CYR.search(l)]
 print(f'ключей: {len(data)} | плейсхолдеров: {len(ph)} | совпало: {ph == set(data)}')
 print('секции:', sorted({k.split(".")[0] for k in data}))

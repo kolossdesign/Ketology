@@ -194,14 +194,29 @@ blockquote{margin:0}
 .flavor__name{font-size:30px;line-height:37px;font-weight:500;letter-spacing:-.6px}
 .flavor__sub{font-size:16px;line-height:21px;font-weight:300;margin-top:12px}
 
-/* ── Экспертный взгляд ─────────────────────────────────────────────────────── */
-.expert{display:grid;grid-template-columns:646fr 541fr;gap:80px;align-items:center;
-  margin:40px auto 0;max-width:1267px}
+/* ── Экспертный взгляд: слайдер ────────────────────────────────────────────── */
+.expert{margin:40px auto 0;max-width:1267px;position:relative}
+.expert__slide{display:grid;grid-template-columns:646fr 541fr;gap:80px;align-items:start}
+/* WHY: неактивный слайд не убираем из потока display:none, а прячем — так высота
+   блока считается по самому длинному слайду и страница не прыгает при листании. */
+.expert__slide[hidden]{display:none}
 .expert__img{border-radius:var(--r-card);width:100%;height:auto;object-fit:cover}
-.expert__body{display:flex;flex-direction:column;gap:40px}
-.expert__quote{font-size:22px;line-height:29px;font-weight:300;white-space:pre-line}
+.expert__body{display:flex;flex-direction:column;gap:40px;min-height:645px}
+.expert__title{font-size:32px;line-height:43px;font-weight:500}
+.expert__quote{font-size:22px;line-height:29px;font-weight:300}
 .expert__name{font-size:18px;line-height:24px;font-weight:500}
 .expert__role{font-size:16px;line-height:21px;font-weight:300;color:var(--muted);margin-top:8px}
+.expert__nav{display:flex;gap:12px;margin-top:auto}
+/* кнопки листания: круг 40, обводка 1px, неактивная — прозрачность .4 (из макета) */
+.expert__arrow{width:40px;height:40px;border-radius:100px;border:1px solid #000;
+  background:none;cursor:pointer;display:grid;place-items:center;padding:0;
+  transition:opacity .15s,background .15s}
+.expert__arrow:hover:not(:disabled){background:rgba(0,0,0,.06)}
+.expert__arrow:disabled{opacity:.4;cursor:default}
+.expert__arrow::before{content:"";width:8px;height:8px;border-left:1.5px solid #000;
+  border-bottom:1.5px solid #000}
+.expert__arrow--prev::before{transform:rotate(45deg);margin-left:3px}
+.expert__arrow--next::before{transform:rotate(-135deg);margin-right:3px}
 
 /* ── Мировое качество ──────────────────────────────────────────────────────── */
 .quality{display:grid;grid-template-columns:407px 1fr;gap:265px;align-items:center}
@@ -477,14 +492,36 @@ blockquote{margin:0}
   <section class="shell pad section">
     <h2 class="h2 h2--tight">{{expert.title_1}}</h2>
     <div class="expert">
-      <img class="expert__img" src="assets/expert-photo.webp" alt="{{expert.alt_1}}" width="646" height="645">
-      <div class="expert__body">
-        <blockquote class="expert__quote">{{expert.quote_1}}</blockquote>
-        <div>
-          <p class="expert__name">{{expert.text_1}}</p>
-          <p class="expert__role">{{expert.text_2}}</p>
+      <article class="expert__slide" data-slide="1">
+        <img class="expert__img" src="assets/expert-1.webp" alt="{{expert.alt_1}}" width="646" height="645">
+        <div class="expert__body">
+          <h3 class="expert__title">{{expert.title_2}}</h3>
+          <blockquote class="expert__quote">{{expert.quote_1}}</blockquote>
+          <div>
+            <p class="expert__name">{{expert.text_1}}</p>
+            <p class="expert__role">{{expert.text_2}}</p>
+          </div>
+          <div class="expert__nav">
+            <button class="expert__arrow expert__arrow--prev" data-nav="prev" aria-label="{{expert.arialabel_1}}"></button>
+            <button class="expert__arrow expert__arrow--next" data-nav="next" aria-label="{{expert.arialabel_2}}"></button>
+          </div>
         </div>
-      </div>
+      </article>
+      <article class="expert__slide" data-slide="2" hidden>
+        <img class="expert__img" src="assets/expert-2.webp" alt="{{expert.alt_2}}" width="646" height="645">
+        <div class="expert__body">
+          <h3 class="expert__title">{{expert.title_3}}</h3>
+          <blockquote class="expert__quote">{{expert.quote_2}}</blockquote>
+          <div>
+            <p class="expert__name">{{expert.text_3}}</p>
+            <p class="expert__role">{{expert.text_4}}</p>
+          </div>
+          <div class="expert__nav">
+            <button class="expert__arrow expert__arrow--prev" data-nav="prev" aria-label="{{expert.arialabel_3}}"></button>
+            <button class="expert__arrow expert__arrow--next" data-nav="next" aria-label="{{expert.arialabel_4}}"></button>
+          </div>
+        </div>
+      </article>
     </div>
   </section>
 
@@ -516,6 +553,27 @@ blockquote{margin:0}
     </div>
   </section>
 </main>
+
+<script>
+// Слайдер «Экспертный взгляд». Кнопка гаснет, когда листать в её сторону некуда —
+// прозрачность 0.4 задана макетом.
+(function () {
+  var slides = [].slice.call(document.querySelectorAll('.expert__slide'));
+  if (slides.length < 2) return;
+  var i = 0;
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (s, k) { s.hidden = k !== i; });
+    slides[i].querySelector('[data-nav=prev]').disabled = i === 0;
+    slides[i].querySelector('[data-nav=next]').disabled = i === slides.length - 1;
+  }
+  document.querySelector('.expert').addEventListener('click', function (e) {
+    var nav = e.target.closest('[data-nav]');
+    if (nav) show(i + (nav.dataset.nav === 'next' ? 1 : -1));
+  });
+  show(0);
+})();
+</script>
 
 <!--ECOM_FOOTER-->
 
