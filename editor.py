@@ -62,11 +62,26 @@ x-t:focus{outline:none}
 /* WHY: рамку рисуем на РОДИТЕЛЕ. Инлайновый элемент в несколько строк обводится
    по каждой строке — получается «лапша». Родитель и есть текстовый фрейм. */
 .lp-frame{border-radius:4px}
-.lp-frame:focus-within{outline:2px solid #EE4729;outline-offset:6px;
+/* Обводка и курсор — только в режиме правки: в просмотре страница обычная. */
+body.lp-edit x-t{cursor:text}
+body.lp-edit .lp-frame:focus-within{outline:2px solid #EE4729;outline-offset:6px;
   background:rgba(238,71,41,.05)}
 
-#lp-bar{position:fixed;left:0;right:0;bottom:0;z-index:100000;
+/* Кнопка входа в правку. В режиме правки прячется — выход через «Просмотр». */
+#lp-edit-btn{position:fixed;right:20px;bottom:20px;z-index:100001;
+  width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;
+  background:#161616;color:#fff;display:grid;place-items:center;
+  box-shadow:0 4px 16px rgba(0,0,0,.28)}
+#lp-edit-btn:hover{background:#EE4729}
+body.lp-edit #lp-edit-btn{display:none}
+/* Жёлтая точка: в браузере лежат несохранённые правки, а панели не видно. */
+#lp-edit-btn .dot{position:absolute;top:6px;right:6px;width:11px;height:11px;
+  border-radius:50%;background:#FFD600;border:2px solid #161616;display:none}
+#lp-edit-btn.pending .dot{display:block}
+
+#lp-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:100000;
   font:14px/1.4 system-ui,sans-serif;background:#161616;color:#fff}
+body.lp-edit #lp-bar{display:block}
 .lp-row{display:flex;gap:10px;align-items:center;padding:9px 16px;flex-wrap:wrap}
 .lp-row + .lp-row{border-top:1px solid #2e2e2e}
 #lp-bar b{font-weight:600}
@@ -89,7 +104,7 @@ x-t:focus{outline:none}
 #lp-bar .lp-lang .del{padding:6px 8px;background:#222;color:#ff8f78}
 .lp-lang .del:hover{background:#402020}
 .lp-status{font-weight:600}
-body{padding-bottom:110px}
+body.lp-edit{padding-bottom:110px}
 '''
 
 JS = r'''
@@ -126,6 +141,10 @@ JS = r'''
     // WHY: сохранять и сбрасывать нечего, пока нет изменений — гасим кнопки,
     // чтобы не гадать, сработало или нет.
     var has = pending();
+    // WHY: панели в просмотре не видно, а несохранённые правки есть — точка на
+    // кнопке единственный способ об этом узнать, не заходя в редактор.
+    var eb = document.getElementById('lp-edit-btn');
+    if (eb) eb.classList.toggle('pending', has);
     ['publish', 'reset'].forEach(function (a) {
       var btn = bar.querySelector('[data-act="' + a + '"]');
       if (btn && btn.textContent.indexOf('Сохраня') === -1) btn.disabled = !has;
@@ -284,9 +303,27 @@ JS = r'''
     markAll();
   }
 
+  // ── режимы: просмотр (по умолчанию) и правка ────────────────────────────────
+  // WHY: страница живёт двумя жизнями — её показывают и её правят. В просмотре
+  // ничто не должно намекать на редактор: ни рамок, ни курсора текста, ни панели.
+  var editing = false;
+
+  function setMode(on) {
+    editing = on;
+    document.body.classList.toggle('lp-edit', on);
+    document.querySelectorAll('x-t[data-k]').forEach(function (n) {
+      if (on) n.setAttribute('contenteditable', 'true');
+      else n.removeAttribute('contenteditable');
+    });
+    // выходим из правки с активным полем — сначала сохраняем его, потом гасим
+    if (!on && document.activeElement && document.activeElement.tagName === 'X-T') {
+      document.activeElement.blur();
+    }
+    updateStatus();
+  }
+
   document.querySelectorAll('x-t[data-k]').forEach(function (n) {
     frameOf(n).classList.add('lp-frame');
-    n.setAttribute('contenteditable', 'true');
     n.setAttribute('spellcheck', 'false');
     // WHY: из Word прилетает разметка со шрифтами и цветами — вставляем только текст
     n.addEventListener('paste', function (e) {
@@ -303,8 +340,11 @@ JS = r'''
     var link = n.parentElement && n.parentElement.closest('a');
     if (link) {
       link.setAttribute('draggable', 'false');
-      link.addEventListener('click', function (e) { e.preventDefault(); });
-      n.addEventListener('mousedown', function () { setTimeout(function () { n.focus(); }, 0); });
+      // WHY: гасим переход только в правке — в просмотре ссылка обязана работать
+      link.addEventListener('click', function (e) { if (editing) e.preventDefault(); });
+      n.addEventListener('mousedown', function () {
+        if (editing) setTimeout(function () { n.focus(); }, 0);
+      });
     }
     n.addEventListener('blur', function () {          // сохраняем по снятию фокуса
       put(n.dataset.k, clean(n.innerHTML));
@@ -468,8 +508,21 @@ JS = r'''
       '<button data-act="publish" class="primary">Сохранить</button>' +
       '<button data-act="reset">Сбросить правки</button>' +
       '<span class="sp"></span>' +
+      '<button data-act="view">Закрыть редактор</button>' +
     '</div>';
   document.body.appendChild(bar);
+
+  var editBtn = document.createElement('button');
+  editBtn.id = 'lp-edit-btn';
+  editBtn.title = 'Редактировать тексты';
+  editBtn.setAttribute('aria-label', 'Редактировать тексты');
+  editBtn.innerHTML =
+    '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>' +
+    '<span class="dot"></span>';
+  editBtn.addEventListener('click', function () { setMode(true); });
+  document.body.appendChild(editBtn);
 
   bar.addEventListener('click', function (e) {
     var t = e.target, act = t.dataset.act;
@@ -500,6 +553,7 @@ JS = r'''
     if (act === 'one') return download(current + '.json',
                                        JSON.stringify(dataOf(current), null, 2) + '\n');
     if (act === 'all') return download('locales.json', bundle());
+    if (act === 'view') return setMode(false);
     if (act === 'publish') return publish(t);
     if (act === 'reset') {
       if (!confirm('Вернуть исходные тексты и языки? Все правки в браузере пропадут.')) return;
