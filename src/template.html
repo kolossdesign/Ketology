@@ -267,23 +267,27 @@ a.btn,button.btn{
   .hero__bg{position:static;width:153%;max-width:none;height:auto;
     margin-left:-53%;margin-top:49px;object-fit:fill}
   .quality{grid-template-columns:1fr;gap:40px}
-  /* WHY: у .nutri был свой padding поверх padding-а .nutri__inner — на телефоне
-     набегало 104px по краям вместо 20px, как во всех остальных секциях. */
+  /* ── Баланс нутриентов на телефоне. Всё по ноде 977:652 (холст 375) ───────
+     Это не сжатый десктоп: свои размеры текста и отдельно снятая картинка.
+     Градиент пересчитан из ручек Figma: они заданы парой осей, и настоящие
+     полуоси эллипса — их суммы, 199px по горизонтали и 894px по вертикали.
+     От 375x819 это 53% и 109%; на десктопе та же математика даёт круг 764. */
   .nutri{flex-direction:column;align-items:stretch;padding:0;min-height:0;
-    /* пятно света привязано к ширине блока, иначе на узком экране круг уезжает за кадр */
-    background:radial-gradient(circle 150% at 68% 96%,
+    background:radial-gradient(ellipse 53% 109% at 66% 102.3%,
       #FFEE95 0%, #FF8475 55%, #D94938 100%)}
-  .nutri__inner{padding:48px 20px;gap:32px}
-  .nutri__text,.nutri__grid{max-width:none}
-  /* Полоса держит пропорцию, снимок разложен в процентах от неё. height:auto
-     обязателен — иначе от атрибута height остаётся 865px и снимок растягивает. */
+  .nutri__inner{padding:48px 24px 0;gap:40px}
+  .nutri__text{max-width:none;gap:40px}
+  .nutri__title{font-size:34px;line-height:40px;letter-spacing:-1px;max-width:none}
+  .nutri__note{font-size:16px;line-height:20px;margin-bottom:24px}
+  .nutri__grid{max-width:none;grid-template-columns:repeat(3,1fr);gap:32px 24px}
+  .stat__v{font-size:28px;line-height:32px;letter-spacing:0}
+  .stat__v span{font-size:20px;line-height:24px;letter-spacing:0}
+  .stat__l{font-size:16px;line-height:20px}
+  .nutri__foot{font-size:14px;line-height:18.7px;max-width:none}
+  /* Снимок — полоса 375x314 во всю ширину, нижние 43px срезает край блока */
   .nutri__media{position:relative;left:auto;top:auto;transform:none;
-    width:100%;height:auto;aspect-ratio:100/97;margin-top:0}
-  .nutri__media img{position:absolute;height:auto;max-width:none}
-  /* WHY: слева у снимка 18,5% прозрачного поля (непрозрачная область начинается
-     с 383px из 2072). Сдвигаем на эту долю, чтобы сцена упёрлась в левый край
-     экрана, а не висела с зазором; справа кадр уходит за край, как на десктопе. */
-  .nutri__media .scene{width:130%;left:-24%;top:0}
+    width:100%;height:auto;aspect-ratio:375/271;overflow:hidden;margin-top:0}
+  .nutri__media .scene{position:static;width:100%;height:auto;max-width:none}
   .nutri__spot{display:none}
   .tasks{grid-template-columns:1fr 1fr;grid-template-rows:none}
   .task--tall{grid-row:span 1;min-height:420px}
@@ -296,9 +300,6 @@ a.btn,button.btn{
   .h1,.h2{font-size:32px;line-height:38px;letter-spacing:-.6px}
   .h3{font-size:26px;line-height:31px}
   .expert__quote{font-size:18px;line-height:25px}
-  .nutri__title{font-size:30px;line-height:36px}
-  .nutri__grid{grid-template-columns:repeat(2,1fr);gap:28px}
-  .stat__v{font-size:40px;line-height:48px}
   .tasks{grid-template-columns:1fr}
   .compare__head,.crow{grid-template-columns:1fr;gap:8px}
   .compare__head{display:none}
@@ -398,7 +399,10 @@ a.btn,button.btn{
         <p class="nutri__foot"><span>*</span><span>{{nutrients.text_12}}</span></p>
       </div></div>
       <div class="nutri__media" aria-hidden="true">
-        <img class="scene" src="assets/nutrients-scene.webp" alt="" width="1036" height="865">
+        <picture>
+          <source media="(max-width:1023px)" srcset="assets/nutrients-mobile.webp" width="375" height="314">
+          <img class="scene" src="assets/nutrients-scene.webp" alt="" width="1036" height="865">
+        </picture>
       </div>
     </div>
   </section>
