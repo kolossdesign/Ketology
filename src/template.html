@@ -239,12 +239,27 @@ blockquote{margin:0}
 @media (max-width:1023px){
   .pad{padding-inline:20px}
   .mct,.cta,.expert__slide{grid-template-columns:1fr;gap:32px}
+  /* отступ от картинки нужен только в две колонки — на телефоне он уводил текст на 100px */
+  .mct__text{padding-left:0;max-width:none}
   .expert__body{min-height:0}
   .hero__inner{padding:48px 20px;gap:32px}
   .quality{grid-template-columns:1fr;gap:40px}
-  .nutri{flex-direction:column;align-items:stretch;padding:48px 40px;min-height:0}
-  .nutri__media{position:static;width:auto;height:auto;margin-top:32px}
-  .nutri__media img{position:static;width:100%;max-width:520px;margin-inline:auto}
+  /* WHY: у .nutri был свой padding поверх padding-а .nutri__inner — на телефоне
+     набегало 104px по краям вместо 20px, как во всех остальных секциях. */
+  .nutri{flex-direction:column;align-items:stretch;padding:0;min-height:0;
+    /* пятно света привязано к ширине блока, иначе на узком экране круг уезжает за кадр */
+    background:radial-gradient(circle 150% at 68% 96%,
+      #FFEE95 0%, #FF8475 55%, #D94938 100%)}
+  .nutri__inner{padding:48px 20px;gap:32px}
+  .nutri__text,.nutri__grid{max-width:none}
+  /* Снимки остаются одной сценой, а не двумя картинками в столбик: полоса держит
+     пропорцию, банка и рука разложены в процентах от неё. height:auto обязателен —
+     иначе от атрибута height остаётся 510px и снимок растягивает по вертикали. */
+  .nutri__media{position:relative;left:auto;top:auto;transform:none;
+    width:100%;height:auto;aspect-ratio:390/210;margin-top:8px}
+  .nutri__media img{position:absolute;height:auto;max-width:none}
+  .nutri__media .bottom{width:104%;left:-6%;top:24%}
+  .nutri__media .top{width:88%;left:24%;top:-4%}
   .nutri__spot{display:none}
   .tasks{grid-template-columns:1fr 1fr;grid-template-rows:none}
   .task--tall{grid-row:span 1;min-height:420px}
