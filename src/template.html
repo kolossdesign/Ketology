@@ -104,19 +104,16 @@ blockquote{margin:0}
 /* ── Баланс нутриентов ─────────────────────────────────────────────────────── */
 .nutri{
   position:relative;overflow:hidden;
-  background:linear-gradient(135deg,#D94938 0%,#FF8475 100%);
+  /* WHY: радиальный градиент из макета. Центр и радиус пересчитаны из ручек
+     Figma: центр (0.66, 1.023) от размеров блока, обе оси по 764px — значит круг. */
+  background:radial-gradient(circle 764px at 66% 102.3%,
+    #FFEE95 0%, #FF8475 55%, #D94938 100%);
   color:var(--white);min-height:700px;
   display:flex;align-items:center;
 }
 /* WHY: в макете блок идёт во всю ширину страницы (0…1440), а текст внутри
    начинается с отступа 64 — как у остальных секций. */
 .nutri__inner{padding:64px;margin-inline:auto;width:100%;max-width:var(--shell)}
-/* WHY: жёлтые пятна в макете — отдельные эллипсы поверх градиента.
-   Рисуем их стилями: в картинке они весили бы 1,3 МБ. */
-.nutri__spot{position:absolute;border-radius:50%;background:#FFEE95;opacity:.35;
-  width:1355px;height:1326px;pointer-events:none;z-index:0}
-.nutri__spot--a{left:328px;top:250px}
-.nutri__spot--b{left:328px;top:30px}
 .nutri__inner{position:relative;z-index:2;display:flex;flex-direction:column;gap:48px}
 .nutri__text{display:flex;flex-direction:column;gap:48px;max-width:631px}
 .nutri__title{font-size:40px;line-height:48px;font-weight:500;letter-spacing:-1.2px;max-width:373px}
@@ -127,13 +124,13 @@ blockquote{margin:0}
 .stat__v span{font-size:32px;line-height:39px;letter-spacing:-.96px}
 .stat__l{font-size:20px;line-height:27px;font-weight:300}
 .nutri__foot{display:flex;gap:4px;font-size:14px;line-height:19px;font-weight:300;max-width:470px}
-/* WHY: композиция из двух снимков намеренно выходит за правый край блока —
-   так она стоит в макете (x 690…1490 при ширине блока 1440). */
-.nutri__media{position:absolute;z-index:1;right:-50px;top:-75px;width:800px;height:850px;
-  pointer-events:none}
+/* WHY: снимки намеренно выходят за края блока — так они стоят в макете.
+   Контейнер повторяет холст 1440, поэтому координаты берутся прямо из Figma. */
+.nutri__media{position:absolute;z-index:1;left:50%;top:0;transform:translateX(-50%);
+  width:1440px;height:100%;pointer-events:none}
 .nutri__media img{position:absolute;width:auto;max-width:none}
-.nutri__media .top{top:0;left:60px;width:1095px}
-.nutri__media .bottom{top:448px;left:9px;width:1233px}
+.nutri__media .bottom{left:499px;top:373px;width:1233px}
+.nutri__media .top{left:550px;top:-75px;width:1095px}
 
 /* ── Сравнение ─────────────────────────────────────────────────────────────── */
 .compare__head{display:grid;grid-template-columns:638fr 325fr 325fr;gap:12px;margin-top:45px;margin-bottom:12px}
@@ -342,8 +339,6 @@ blockquote{margin:0}
   <!-- ── Баланс нутриентов ── -->
   <section class="section">
     <div class="nutri">
-      <span class="nutri__spot nutri__spot--a" aria-hidden="true"></span>
-      <span class="nutri__spot nutri__spot--b" aria-hidden="true"></span>
       <div class="nutri__inner"><div class="nutri__text">
         <h2 class="nutri__title" style="text-align:left">{{nutrients.title_1}}</h2>
         <div>
@@ -360,8 +355,8 @@ blockquote{margin:0}
         <p class="nutri__foot"><span>*</span><span>{{nutrients.text_12}}</span></p>
       </div></div>
       <div class="nutri__media" aria-hidden="true">
-        <img class="top" src="assets/nutrients-top.webp" alt="" width="1095" height="448">
         <img class="bottom" src="assets/nutrients-bottom.webp" alt="" width="1233" height="510">
+        <img class="top" src="assets/nutrients-top.webp" alt="" width="1095" height="448">
       </div>
     </div>
   </section>
