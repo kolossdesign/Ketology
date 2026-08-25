@@ -59,10 +59,13 @@ blockquote{margin:0}
 .h5{font-size:26px;line-height:32px;font-weight:500}
 .body{font-size:16px;line-height:21px;font-weight:300}
 
-.btn{
+/* WHY: у екома есть свой `.btn,a.btn{font:1rem/1em Glober;…}` — селектор с тегом
+   бьёт голый `.btn` по специфичности, и наши кнопки рендерились чужим шрифтом
+   с высотой строки 1em. Отвечаем тем же весом: `a.btn` + явный font-family. */
+a.btn,button.btn{
   display:inline-flex;align-items:center;gap:6px;
   background:var(--accent);color:var(--white);
-  font-size:16px;line-height:21px;font-weight:500;
+  font-family:var(--font);font-size:16px;line-height:21px;font-weight:500;
   padding:14px 24px 15px;border-radius:var(--r-pill);
   text-decoration:none;border:0;cursor:pointer;
   transition:background .18s ease,transform .18s ease;
@@ -241,7 +244,28 @@ blockquote{margin:0}
   /* отступ от картинки нужен только в две колонки — на телефоне он уводил текст на 100px */
   .mct__text{padding-left:0;max-width:none}
   .expert__body{min-height:0}
-  .hero__inner{padding:48px 20px;gap:32px}
+  /* ── Мобильный герой. Всё по ноде 980:715 (холст 375) ────────────────────
+     Здесь другая конструкция, а не сжатый десктоп: фон однотонный, а кадр
+     с банками лежит ПОЛОСОЙ снизу, шире экрана и обрезан слева. */
+  .hero{display:flex;flex-direction:column;align-items:stretch;
+    background:#7B4E3F;min-height:0;padding-top:48px}
+  /* картинка в разметке идёт первой (на десктопе она фон) — здесь она внизу */
+  .hero picture{order:2;display:block}
+  .hero__inner{order:1;position:static;padding:0 12px;gap:0;text-align:center;align-items:center}
+  .hero__logo{width:164px;margin-inline:auto}
+  .hero__body{max-width:none;width:100%;align-items:center;gap:24px;margin-top:37px}
+  /* WHY: у заголовка и лида в макете РАЗНАЯ ширина строки — 343 и 350.
+     Отсюда и разбивка на строки; при одинаковой ширине лид уезжает в 5 строк. */
+  .hero .h1{font-size:34px;line-height:40px;letter-spacing:-1px;max-width:343px}
+  /* WHY: перенос расставлен под десктоп, на узком экране он рвёт фразу не там.
+     Гасим его. Пробел на стыке даёт &nbsp; в самом тексте — он же не даёт
+     оторвать «и» от «метаболизм», и строки ложатся ровно как в макете. */
+  .hero .h1 br{display:none}
+  .hero__lead{max-width:350px;font-size:16px;line-height:21.4px}
+  .hero .btn{padding:14px 32px 15px}
+  /* 574 из 375 = 153% ширины, сдвиг влево на 199 = 53% — цифры из макета */
+  .hero__bg{position:static;width:153%;max-width:none;height:auto;
+    margin-left:-53%;margin-top:49px;object-fit:fill}
   .quality{grid-template-columns:1fr;gap:40px}
   /* WHY: у .nutri был свой padding поверх padding-а .nutri__inner — на телефоне
      набегало 104px по краям вместо 20px, как во всех остальных секциях. */
@@ -293,11 +317,14 @@ blockquote{margin:0}
 <main>
   <!-- ── Hero ── -->
   <section class="hero">
-    <img class="hero__bg" src="assets/hero-kv.webp" alt="Коктейли Кетолоджи" width="1440" height="657">
+    <picture>
+      <source media="(max-width:1023px)" srcset="assets/hero-kv-mobile.webp" width="574" height="262">
+      <img class="hero__bg" src="assets/hero-kv.webp" alt="Коктейли Кетолоджи" width="1440" height="657">
+    </picture>
     <div class="hero__inner">
       <img class="hero__logo" src="assets/logo-ketology-white.svg" alt="Кетолоджи" width="235" height="36">
       <div class="hero__body">
-        <h1 class="h1">Активируйте метаболизм<br>и худейте комфортно</h1>
+        <h1 class="h1">Активируйте метаболизм&nbsp;<br>и худейте комфортно</h1>
         <p class="body hero__lead">Полноценная замена приема пищи или сытный перекус: функциональный коктейль с MCT-маслами, растительным белком, пищевыми волокнами и 13 витаминами</p>
         <a class="btn" href="#flavors">Подробнее</a>
       </div>

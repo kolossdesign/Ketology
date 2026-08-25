@@ -186,7 +186,8 @@ def rebase(html, base):
     if not base:
         return html
     base = base.rstrip('/') + '/'
-    html = re.sub(r'(src|href)="assets/', lambda m: f'{m.group(1)}="{base}assets/', html)
+    # srcset — из-за <picture>: мобильный кадр иначе остался бы с относительным путём
+    html = re.sub(r'(src|href|srcset)="assets/', lambda m: f'{m.group(1)}="{base}assets/', html)
     html = re.sub(r'url\((["\']?)assets/', lambda m: f'url({m.group(1)}{base}assets/', html)
     return html
 
