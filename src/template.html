@@ -186,15 +186,20 @@ a.btn,button.btn{
 /* Карточка вкуса — один цельный снимок (нода 994:944). Он встаёт по ширине,
    ничего не обрезается, высоту карточки задаёт он же. Подпись с кнопкой лежит
    поверх нижней части кадра — там для неё оставлено пустое место. */
+/* WHY: 660 — высота карточки в максимальном состоянии (424 шириной). Задаём
+   пропорцией, а не height, чтобы при сужении карточка уменьшалась пропорционально
+   и на планшете, где она тоже 424, снова получалось ровно 660. */
 .flavor{
-  position:relative;overflow:hidden;border-radius:var(--r-card);
+  position:relative;overflow:hidden;border-radius:var(--r-card);aspect-ratio:424/660;
 }
 /* Фон карточки продолжает низ снимка: если карточка окажется выше кадра,
    стык не будет виден. Цвета заданы дизайнером под каждый вкус. */
 .flavor--vanilla{background:#FCE8DC}
 .flavor--peach{background:#FEF1EE}
 .flavor--choco{background:#FCECE6}
-.flavor__pack{display:block;width:100%;height:auto}
+/* кадр закрывает карточку целиком; лишнее срезается снизу, где у снимка
+   пустой подиум — там же лежит подпись с кнопкой */
+.flavor__pack{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
 .flavor__foot{
   position:absolute;left:0;right:0;bottom:0;z-index:3;padding:0 30px 40px;
   display:flex;flex-direction:column;gap:32px;align-items:center;text-align:center;
