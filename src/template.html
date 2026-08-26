@@ -324,6 +324,33 @@ a.btn,button.btn{
      своего содержимого и на 360px вылезала на 14px за правое поле. */
   .comp-card{min-width:0}
   .cta__inner{padding-inline:24px;justify-content:center}
+  /* ── Строка сравнения на телефоне. Нода 994:782 ────────────────────────────
+     Три полосы друг под другом: название, «Кетолоджи», диета. Подписи слева,
+     значок справа; в мобильном макете кружок тёмный, а не красный. */
+  .compare__head{display:none}
+  .crow{grid-template-columns:1fr;gap:0;margin-bottom:12px}
+  .crow > div{border-radius:8px;padding:16px 24px;font-size:20px;line-height:26.7px}
+  .crow > .crow__k,.crow > .crow__d{justify-content:space-between;gap:8px;
+    font-size:16px;line-height:21.4px;font-weight:300}
+  .crow__k::before{content:"{{compare.mobile_ketology}}"}
+  .crow__d::before{content:"{{compare.mobile_diet}}"}
+  .tick{background:var(--ink)}
+
+  /* Единый размер заголовков внутренних блоков и единая отбивка до контента */
+  .h2,.nutri__title{font-size:32px;line-height:38px;letter-spacing:-.6px}
+  /* WHY: в «Мировом качестве» заголовок лежит внутри .quality__txt, и отбивку
+     там задаёт его собственный gap — он уже 24. Логотипы это соседний блок. */
+  .mct,.composition,.tasks,.flavors,.expert{margin-top:24px}
+  .compare__head + .crow{margin-top:24px}
+
+  /* ── Вкусы: высота карточки = высота картинки ─────────────────────────────── */
+  /* WHY: высота теперь равна высоте картинки, а картинка тянется за шириной —
+     на планшете карточка вырастала до 1400px. Держим её в натуральных 424. */
+  .flavor{min-height:0;display:block;max-width:424px;margin-inline:auto;width:100%}
+  .flavor__pack{position:static;margin-top:-6px}
+  .flavor__foot{position:absolute;left:0;right:0;bottom:0;padding:0 24px 24px;gap:16px}
+  .flavor__sub{margin-top:8px}
+
   .cta__card{width:100%;max-width:560px}
 }
 @media (max-width:820px){
@@ -331,12 +358,7 @@ a.btn,button.btn{
   .h1,.h2{font-size:32px;line-height:38px;letter-spacing:-.6px}
   .h3{font-size:26px;line-height:31px}
   .expert__quote{font-size:18px;line-height:25px}
-  .compare__head,.crow{grid-template-columns:1fr;gap:8px}
-  .compare__head{display:none}
-  .crow > *{padding:16px}
-  .crow__k::after{content:"{{compare.mobile_ketology}}";font-weight:300;font-size:14px}
-  .crow__d::after{content:"{{compare.mobile_diet}}";font-weight:300;font-size:14px;margin-left:6px}
-  .quality__logos{gap:32px;justify-content:flex-start;flex-wrap:wrap}
+      .quality__logos{gap:32px;justify-content:flex-start;flex-wrap:wrap}
   .quality__logos img{max-height:64px;width:auto}
 }
 </style>

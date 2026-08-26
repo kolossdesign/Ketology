@@ -116,8 +116,8 @@ head_t = (head.replace(f'<title>{title}</title>', '<title>{{meta.title}}</title>
               .replace('<html lang="ru">', '<html lang="{{meta.lang}}">'))
 
 # подписи колонок сравнения на мобильном живут в CSS ::after
-for k, v in (('compare.mobile_ketology', ' — Кетолоджи'),
-             ('compare.mobile_diet', ' — низкокалорийная диета')):
+for k, v in (('compare.mobile_ketology', 'Кетолоджи'),
+             ('compare.mobile_diet', 'Низкокалорийная диета')):
     assert f'content:"{v}"' in head_t, v
     head_t = head_t.replace(f'content:"{v}"', f'content:"{{{{{k}}}}}"')
     content[k] = v
