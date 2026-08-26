@@ -186,9 +186,13 @@ a.btn,button.btn{
    ничего не обрезается, высоту карточки задаёт он же. Подпись с кнопкой лежит
    поверх нижней части кадра — там для неё оставлено пустое место. */
 .flavor{
-  position:relative;overflow:hidden;border-radius:var(--r-card);background:var(--cream);
+  position:relative;overflow:hidden;border-radius:var(--r-card);
 }
-.flavor--grey{background:var(--grey-card)}
+/* Фон карточки продолжает низ снимка: если карточка окажется выше кадра,
+   стык не будет виден. Цвета заданы дизайнером под каждый вкус. */
+.flavor--vanilla{background:#FCE8DC}
+.flavor--peach{background:#FEF1EE}
+.flavor--choco{background:#FCECE6}
 .flavor__pack{display:block;width:100%;height:auto}
 .flavor__foot{
   position:absolute;left:0;right:0;bottom:0;z-index:3;padding:0 30px 40px;
@@ -572,8 +576,8 @@ a.btn,button.btn{
   <section class="shell pad section" id="flavors">
     <h2 class="h2 h2--tight">{{flavors.title_1}}</h2>
     <div class="flavors">
-      <article class="flavor">
-        <img class="flavor__pack" src="assets/flavor-vanilla-994.webp" alt="{{flavors.alt_1}}" width="752" height="1291">
+      <article class="flavor flavor--vanilla">
+        <img class="flavor__pack" src="assets/flavor-vanilla-997.webp" alt="{{flavors.alt_1}}" width="750" height="1271">
         <div class="flavor__foot">
           <div>
             <h3 class="flavor__name">{{flavors.title_2}}</h3>
@@ -582,8 +586,8 @@ a.btn,button.btn{
           <a class="btn" href="#">{{flavors.btn_1}}</a>
         </div>
       </article>
-      <article class="flavor flavor--grey">
-        <img class="flavor__pack" src="assets/flavor-peach-994.webp" alt="{{flavors.alt_2}}" width="752" height="1291">
+      <article class="flavor flavor--peach">
+        <img class="flavor__pack" src="assets/flavor-peach-997.webp" alt="{{flavors.alt_2}}" width="750" height="1271">
         <div class="flavor__foot">
           <div>
             <h3 class="flavor__name">{{flavors.title_3}}</h3>
@@ -592,8 +596,8 @@ a.btn,button.btn{
           <a class="btn" href="#">{{flavors.btn_2}}</a>
         </div>
       </article>
-      <article class="flavor">
-        <img class="flavor__pack" src="assets/flavor-choco-994.webp" alt="{{flavors.alt_3}}" width="752" height="1291">
+      <article class="flavor flavor--choco">
+        <img class="flavor__pack" src="assets/flavor-choco-997.webp" alt="{{flavors.alt_3}}" width="750" height="1272">
         <div class="flavor__foot">
           <div>
             <h3 class="flavor__name">{{flavors.title_4}}</h3>
