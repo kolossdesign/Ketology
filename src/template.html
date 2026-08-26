@@ -293,6 +293,9 @@ a.btn,button.btn{
   .tasks{grid-template-columns:1fr 1fr;grid-template-rows:none}
   .task--tall{grid-row:span 1;min-height:420px}
   .composition,.flavors{grid-template-columns:1fr;gap:24px}
+  /* WHY: у элемента грида min-width:auto — карточка не могла ужаться уже
+     своего содержимого и на 360px вылезала на 14px за правое поле. */
+  .comp-card{min-width:0}
   .cta__inner{padding-inline:24px;justify-content:center}
   .cta__card{width:100%;max-width:560px}
 }
