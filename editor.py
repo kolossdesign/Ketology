@@ -61,11 +61,12 @@ x-t{display:inline;font:inherit;color:inherit;letter-spacing:inherit}
 x-t:focus{outline:none}
 /* WHY: рамку рисуем на РОДИТЕЛЕ. Инлайновый элемент в несколько строк обводится
    по каждой строке — получается «лапша». Родитель и есть текстовый фрейм. */
-.lp-frame{border-radius:4px}
-/* Обводка и курсор — только в режиме правки: в просмотре страница обычная. */
+/* WHY: скругление живёт в правиле фокуса, а не в самом .lp-frame. Раньше класс
+   висел на элементе всегда и перебивал собственные углы вёрстки: у ячейки
+   сравнения с текстом получалось 4px вместо 12px, у соседних — 12px. */
 body.lp-edit x-t{cursor:text}
 body.lp-edit .lp-frame:focus-within{outline:2px solid #EE4729;outline-offset:6px;
-  background:rgba(238,71,41,.05)}
+  border-radius:4px;background:rgba(238,71,41,.05)}
 
 /* Кнопка входа в правку. В режиме правки прячется — выход через «Просмотр». */
 #lp-edit-btn{position:fixed;right:20px;bottom:20px;z-index:100001;
