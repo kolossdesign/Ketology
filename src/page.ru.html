@@ -147,10 +147,12 @@ a.btn,button.btn{
 }
 .crow__k{background:var(--card);justify-content:center;gap:8px;padding-inline:12px}
 .crow__d{justify-content:center;font-size:18px;line-height:24px;font-weight:300}
-.tick{flex:0 0 20px;width:20px;height:20px;border-radius:50%;background:var(--accent-dot);position:relative}
-.tick::after{
-  content:"";position:absolute;left:6px;top:5px;width:7px;height:4px;
-  border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);
+/* Иконка «есть» — нода 994:888: тёмный круг, белая галочка штрихом 2 со
+   скруглёнными концами. Раньше галочку рисовали двумя границами — тонко и остро. */
+.tick{
+  flex:0 0 20px;width:20px;height:20px;border-radius:50%;background:var(--ink);
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.6 10.3l3.2 3.2 5.9-6.4' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:20px 20px;
 }
 .cross{flex:0 0 20px;width:20px;height:20px;position:relative}
 .cross::before,.cross::after{
@@ -340,13 +342,15 @@ a.btn,button.btn{
      Три полосы друг под другом: название, «Кетолоджи», диета. Подписи слева,
      значок справа; в мобильном макете кружок тёмный, а не красный. */
   .compare__head{display:none}
-  .crow{grid-template-columns:1fr;gap:0;margin-bottom:12px}
-  .crow > div{border-radius:8px;padding:16px 24px;font-size:20px;line-height:26.7px}
+  /* Одна карточка со скруглением 12: полосы внутри без собственных углов,
+     их срезает контейнер. Поля 24 по бокам, 12 сверху и снизу. */
+  .crow{grid-template-columns:1fr;gap:0;margin-bottom:16px;
+    border-radius:12px;overflow:hidden}
+  .crow > div{border-radius:0;padding:12px 24px;font-size:20px;line-height:26.7px}
   .crow > .crow__k,.crow > .crow__d{justify-content:space-between;gap:8px;
     font-size:16px;line-height:21.4px;font-weight:300}
   .crow__k::before{content:"Кетолоджи"}
   .crow__d::before{content:"Низкокалорийная диета"}
-  .tick{background:var(--ink)}
 
   /* Единый размер заголовков внутренних блоков и единая отбивка до контента */
   /* заголовок слайдера тоже 32 — у него отличалась только высота строки (43) */
