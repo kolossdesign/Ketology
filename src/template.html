@@ -290,8 +290,35 @@ a.btn,button.btn{
     width:100%;height:auto;aspect-ratio:375/271;overflow:hidden;margin-top:0}
   .nutri__media .scene{position:static;width:100%;height:auto;max-width:none}
   .nutri__spot{display:none}
-  .tasks{grid-template-columns:1fr 1fr;grid-template-rows:none}
-  .task--tall{grid-row:span 1;min-height:420px}
+  /* ── Плитки задач на телефоне. Ноды 986:598 (Похудение) и 986:582 (остальные).
+     Две разные схемы: первая — текст сверху, снимок в правом нижнем углу;
+     остальные — текст слева, снимок колонкой справа во всю высоту. */
+  .tasks{grid-template-columns:1fr;grid-template-rows:none;gap:12px}
+  .task{padding:0;display:flex;align-items:stretch;min-height:182px}
+  /* WHY: справа поля нет — в макете строка текста доходит до самого кадра.
+     С полем 24 текст ужимается до 164 и уезжает на лишнюю строку. */
+  .task__txt{padding:24px 0 24px 24px;max-width:none;flex:1 1 auto;min-width:0}
+  .task .h4{font-size:24px;line-height:27px}
+  /* 131 из 343 = 38,2% ширины карточки; пропорция кадра совпадает с исходником,
+     поэтому cover ничего не срезает, а только масштабирует. */
+  /* WHY: колонкой служит <picture>, а не сам <img>. У картинки с заданной
+     шириной высота считается по её пропорции и распирает карточку тем сильнее,
+     чем шире экран: на 768 карточка вырастала до 381px вместо 182. */
+  /* доли из макета, но не крупнее натуральных 131 и 214 — иначе на планшете
+     кадр раздувается и налезает на текст */
+  .task picture{flex:0 0 38.2%;max-width:131px;align-self:stretch;
+    position:relative;overflow:hidden;z-index:1}
+  .task__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .task__blob{left:62.1%;top:6%;width:65.6%;max-width:225px;height:auto;aspect-ratio:1}
+
+  /* Первая плитка — своя схема: текст во всю ширину, кадр в углу 214x202 */
+  .task--tall{grid-row:span 1;min-height:316px;display:block;position:relative}
+  .task--tall .task__txt{padding:24px;max-width:none}
+  /* у «Похудения» кадр отдельный (нода 987:616), поэтому он в <picture> */
+  .task--tall picture{position:absolute;right:0;bottom:0;width:62.4%;max-width:214px;
+    z-index:1;display:block}
+  .task--tall .task__img{position:static;width:100%;height:auto;object-fit:contain;flex:none}
+  .task--tall .task__blob{left:34.1%;top:32.6%;width:111%;max-width:381px;height:auto;aspect-ratio:1}
   .composition,.flavors{grid-template-columns:1fr;gap:24px}
   /* WHY: у элемента грида min-width:auto — карточка не могла ужаться уже
      своего содержимого и на 360px вылезала на 14px за правое поле. */
@@ -304,7 +331,6 @@ a.btn,button.btn{
   .h1,.h2{font-size:32px;line-height:38px;letter-spacing:-.6px}
   .h3{font-size:26px;line-height:31px}
   .expert__quote{font-size:18px;line-height:25px}
-  .tasks{grid-template-columns:1fr}
   .compare__head,.crow{grid-template-columns:1fr;gap:8px}
   .compare__head{display:none}
   .crow > *{padding:16px}
@@ -455,7 +481,10 @@ a.btn,button.btn{
           <h3 class="h4">{{tasks.title_2}}</h3>
           <p class="task__desc">{{tasks.text_1}}</p>
         </div>
-        <img class="task__img" src="assets/task-weight.webp" alt="" width="397" height="450">
+        <picture>
+          <source media="(max-width:1023px)" srcset="assets/task-weight-mobile.webp" width="214" height="202">
+          <img class="task__img" src="assets/task-weight.webp" alt="" width="397" height="450">
+        </picture>
       </article>
       <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
@@ -463,7 +492,9 @@ a.btn,button.btn{
           <h3 class="h4">{{tasks.title_3}}</h3>
           <p class="task__desc">{{tasks.text_2}}</p>
         </div>
-        <img class="task__img" src="assets/task-keto.webp" alt="" width="221" height="306">
+        <picture>
+          <img class="task__img" src="assets/task-keto.webp" alt="" width="221" height="306">
+        </picture>
       </article>
       <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
@@ -471,7 +502,9 @@ a.btn,button.btn{
           <h3 class="h4">{{tasks.title_4}}</h3>
           <p class="task__desc">{{tasks.text_3}}</p>
         </div>
-        <img class="task__img" src="assets/task-zozh.webp" alt="" width="222" height="306">
+        <picture>
+          <img class="task__img" src="assets/task-zozh.webp" alt="" width="222" height="306">
+        </picture>
       </article>
       <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
@@ -479,7 +512,9 @@ a.btn,button.btn{
           <h3 class="h4">{{tasks.title_5}}</h3>
           <p class="task__desc">{{tasks.text_4}}</p>
         </div>
-        <img class="task__img" src="assets/task-longevity.webp" alt="" width="221" height="306">
+        <picture>
+          <img class="task__img" src="assets/task-longevity.webp" alt="" width="221" height="306">
+        </picture>
       </article>
       <article class="task">
         <span class="task__blob" aria-hidden="true"></span>
@@ -487,7 +522,9 @@ a.btn,button.btn{
           <h3 class="h4">{{tasks.title_7}}</h3>
           <p class="task__desc">{{tasks.text_5}}</p>
         </div>
-        <img class="task__img" src="assets/task-sport.webp" alt="" width="221" height="306">
+        <picture>
+          <img class="task__img" src="assets/task-sport.webp" alt="" width="221" height="306">
+        </picture>
       </article>
     </div>
   </section>
