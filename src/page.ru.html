@@ -242,6 +242,18 @@ a.btn,button.btn{
   /* единые боковые поля на телефоне — 24px во всех блоках */
   .pad{padding-inline:24px}
   .mct,.cta,.expert__slide{grid-template-columns:1fr;gap:32px}
+  /* ── Слайдер экспертов на телефоне ────────────────────────────────────────
+     Шаг между заголовком, цитатой и подписью — 24. Стрелки уезжают на фото:
+     .expert__nav лежит в .expert__body, поэтому позиционируем его от слайда
+     прозрачным слоем той же пропорции, что и снимок, — так «низ фото» не
+     приходится вычислять. */
+  .expert__slide{position:relative}
+  .expert__body{gap:24px}
+  .expert__nav{position:absolute;left:0;right:0;top:0;margin:0;
+    aspect-ratio:646/645;padding:16px;pointer-events:none;
+    align-items:flex-end;justify-content:flex-end}
+  .expert__arrow{pointer-events:auto;background:rgba(255,255,255,.92);border-color:transparent}
+  .expert__arrow:hover:not(:disabled){background:#fff}
   /* отступ от картинки нужен только в две колонки — на телефоне он уводил текст на 100px */
   .mct__text{padding-left:0;max-width:none}
   .expert__body{min-height:0}
@@ -337,7 +349,8 @@ a.btn,button.btn{
   .tick{background:var(--ink)}
 
   /* Единый размер заголовков внутренних блоков и единая отбивка до контента */
-  .h2,.nutri__title{font-size:32px;line-height:38px;letter-spacing:-.6px}
+  /* заголовок слайдера тоже 32 — у него отличалась только высота строки (43) */
+  .h2,.nutri__title,.expert__title{font-size:32px;line-height:110%;letter-spacing:-.6px}
   /* WHY: в «Мировом качестве» заголовок лежит внутри .quality__txt, и отбивку
      там задаёт его собственный gap — он уже 24. Логотипы это соседний блок. */
   .mct,.composition,.tasks,.flavors,.expert{margin-top:24px}
@@ -355,7 +368,7 @@ a.btn,button.btn{
 }
 @media (max-width:820px){
   .section{margin-top:64px}
-  .h1,.h2{font-size:32px;line-height:38px;letter-spacing:-.6px}
+  .h1{font-size:32px;line-height:38px;letter-spacing:-.6px}
   .h3{font-size:26px;line-height:31px}
   .expert__quote{font-size:18px;line-height:25px}
       .quality__logos{gap:32px;justify-content:flex-start;flex-wrap:wrap}
