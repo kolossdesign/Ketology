@@ -389,11 +389,31 @@ a.btn,button.btn{
 
   .cta__card{width:100%;max-width:560px}
 }
+@media (max-width:820px){
+  .section{margin-top:64px}
+  .h1{font-size:32px;line-height:38px;letter-spacing:-.6px}
+  .h3{font-size:26px;line-height:31px}
+  .expert__quote{font-size:18px;line-height:25px}
+      .quality__logos{gap:32px;justify-content:flex-start;flex-wrap:wrap}
+  .quality__logos img{max-height:64px;width:auto}
+}
 /* ── Планшет: плитки задач в две колонки ───────────────────────────────────
    «Похудение» занимает левую колонку на два ряда, «Кетопитание» и «Активное
    долголетие» встают справа, а «ЗОЖ» и «Спорт» — нижним рядом. Раскладка
    задана явно: при автопотоке порядок в разметке поставил бы «ЗОЖ» вторым. */
 @media (min-width:768px) and (max-width:1023px){
+  /* Слайдер экспертов на планшете — как на десктопе: фото слева, текст справа,
+     стрелки под текстом, а не на снимке. Высоту тексту не задаём: снимок здесь
+     втрое ниже десктопного, и min-height оставил бы пустоту. */
+  .expert__slide{grid-template-columns:646fr 541fr;gap:40px}
+  .expert__body{gap:40px;min-height:0}
+  .expert__title{font-size:32px;line-height:43px}
+  .expert__quote{font-size:22px;line-height:29px}
+  .expert__nav{position:static;aspect-ratio:auto;padding:0;margin-top:auto;
+    pointer-events:auto;align-items:center;justify-content:flex-start}
+  .expert__arrow{background:none;border:1px solid #000}
+  .expert__arrow:hover:not(:disabled){background:rgba(0,0,0,.06)}
+
   /* Сравнение на планшете — таблицей, как на десктопе: три колонки,
      шапка видна, подписи внутри полос не нужны. */
   .compare__head{display:grid}
@@ -412,14 +432,6 @@ a.btn,button.btn{
   .task:nth-child(4){grid-column:2;grid-row:2}
   .task:nth-child(3){grid-column:1;grid-row:3}
   .task:nth-child(5){grid-column:2;grid-row:3}
-}
-@media (max-width:820px){
-  .section{margin-top:64px}
-  .h1{font-size:32px;line-height:38px;letter-spacing:-.6px}
-  .h3{font-size:26px;line-height:31px}
-  .expert__quote{font-size:18px;line-height:25px}
-      .quality__logos{gap:32px;justify-content:flex-start;flex-wrap:wrap}
-  .quality__logos img{max-height:64px;width:auto}
 }
 </style>
 </head>
