@@ -98,9 +98,11 @@ a.btn,button.btn{
 .mct__lead{max-width:495px}
 
 .composition{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:41px}
+/* WHY: min-height не нужен — в гриде карточки и так тянутся до самой высокой
+   в ряду, а на телефоне (одна колонка) высота идёт за контентом. */
 .comp-card{
   background:var(--white);border-radius:var(--r-card);
-  padding:24px 24px 32px;display:flex;flex-direction:column;gap:22px;min-height:560px;
+  padding:24px;display:flex;flex-direction:column;gap:22px;
 }
 .comp-card__icon{width:180px;height:180px;border-radius:50%;object-fit:cover}
 
@@ -284,12 +286,13 @@ a.btn,button.btn{
   .quality{grid-template-columns:1fr;gap:40px}
   /* ── Баланс нутриентов на телефоне. Всё по ноде 977:652 (холст 375) ───────
      Это не сжатый десктоп: свои размеры текста и отдельно снятая картинка.
-     Градиент пересчитан из ручек Figma: они заданы парой осей, и настоящие
-     полуоси эллипса — их суммы, 199px по горизонтали и 894px по вертикали.
-     От 375x819 это 53% и 109%; на десктопе та же математика даёт круг 764. */
+     Градиент пересчитан из ручек Figma: обе оси по 616px (0,7521 от 819 и
+     1,6426 от 375) — значит круг. Центр 40,3% / 100%, средний стоп уехал
+     с 55% на 35%. Радиус в пикселях, а не в процентах: пятно должно быть
+     одного размера независимо от того, насколько текст растянул блок. */
   .nutri{flex-direction:column;align-items:stretch;padding:0;min-height:0;
-    background:radial-gradient(ellipse 53% 109% at 66% 102.3%,
-      #FFEE95 0%, #FF8475 55%, #D94938 100%)}
+    background:radial-gradient(circle 616px at 40.3% 100%,
+      #FFEE95 0%, #FF8475 35%, #D94938 100%)}
   .nutri__inner{padding:48px 24px 0;gap:40px}
   .nutri__text{max-width:none;gap:40px}
   .nutri__title{font-size:34px;line-height:40px;letter-spacing:-1px;max-width:none}
@@ -309,9 +312,7 @@ a.btn,button.btn{
      остальные — текст слева, снимок колонкой справа во всю высоту. */
   .tasks{grid-template-columns:1fr;grid-template-rows:none;gap:12px}
   .task{padding:0;display:flex;align-items:stretch;min-height:182px}
-  /* WHY: справа поля нет — в макете строка текста доходит до самого кадра.
-     С полем 24 текст ужимается до 164 и уезжает на лишнюю строку. */
-  .task__txt{padding:24px 0 24px 24px;max-width:none;flex:1 1 auto;min-width:0}
+  .task__txt{padding:24px;max-width:none;flex:1 1 auto;min-width:0}
   .task .h4{font-size:24px;line-height:27px}
   /* 131 из 343 = 38,2% ширины карточки; пропорция кадра совпадает с исходником,
      поэтому cover ничего не срезает, а только масштабирует. */
