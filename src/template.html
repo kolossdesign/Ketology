@@ -149,7 +149,10 @@ a.btn,button.btn{
   font-size:20px;line-height:27px;font-weight:500;
 }
 .crow__k{background:var(--card);justify-content:center;gap:8px;padding-inline:12px}
-.crow__d{justify-content:center;font-size:18px;line-height:24px;font-weight:300}
+/* WHY: поля у ячейки несимметричные (20 слева, 12 справа) — текст съезжал влево
+   на 8px, а при переносе на две строки вдобавок ложился по левому краю. */
+.crow > .crow__d{justify-content:center;text-align:center;padding-inline:12px;
+  font-size:18px;line-height:24px;font-weight:300}
 /* Иконка «есть» — нода 994:888: тёмный круг, белая галочка штрихом 2 со
    скруглёнными концами. Раньше галочку рисовали двумя границами — тонко и остро. */
 .tick{
@@ -365,7 +368,7 @@ a.btn,button.btn{
     border-radius:12px;overflow:hidden}
   .crow > div{border-radius:0;padding:12px 24px;font-size:20px;line-height:26.7px}
   .crow > .crow__k,.crow > .crow__d{justify-content:space-between;gap:8px;
-    font-size:16px;line-height:21.4px;font-weight:300}
+    padding-inline:24px;text-align:start;font-size:16px;line-height:21.4px;font-weight:300}
   .crow__k::before{content:"{{compare.mobile_ketology}}"}
   .crow__d::before{content:"{{compare.mobile_diet}}"}
 
@@ -399,8 +402,8 @@ a.btn,button.btn{
   .compare__head + .crow{margin-top:0}
   .crow > div{border-radius:var(--r-row);padding:24px 12px 24px 20px;
     font-size:20px;line-height:27px}
-  .crow > .crow__k,.crow > .crow__d{justify-content:center}
-  .crow > .crow__d{font-size:18px;line-height:24px;font-weight:300}
+  .crow > .crow__k,.crow > .crow__d{justify-content:center;padding-inline:12px}
+  .crow > .crow__d{text-align:center;font-size:18px;line-height:24px;font-weight:300}
   .crow__k::before,.crow__d::before{content:none}
 
   .tasks{grid-template-columns:1fr 1fr}
