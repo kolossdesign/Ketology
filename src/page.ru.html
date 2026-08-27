@@ -288,7 +288,8 @@ a.btn,button.btn{
     z-index:1;pointer-events:none;
     background:linear-gradient(180deg,#815748 0%,rgba(129,87,72,0) 100%)}
   .hero picture{position:absolute;inset:0;z-index:0;display:block}
-  .hero__bg{position:absolute;left:-73.3%;top:-33.6%;width:204.3%;height:auto;
+  /* доли из макета плюс сдвиг вниз на 40 */
+  .hero__bg{position:absolute;left:-73.3%;top:calc(-33.6% + 40px);width:204.3%;height:auto;
     max-width:none;object-fit:fill}
   .hero__inner{order:1;position:relative;z-index:2;flex:1;padding:0;gap:0;
     text-align:center;align-items:center}
