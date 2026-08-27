@@ -276,28 +276,28 @@ a.btn,button.btn{
   /* отступ от картинки нужен только в две колонки — на телефоне он уводил текст на 100px */
   .mct__text{padding-left:0;max-width:none}
   .expert__body{min-height:0}
-  /* ── Мобильный герой. Всё по ноде 980:715 (холст 375) ────────────────────
-     Здесь другая конструкция, а не сжатый десктоп: фон однотонный, а кадр
-     с банками лежит ПОЛОСОЙ снизу, шире экрана и обрезан слева. */
-  .hero{display:flex;flex-direction:column;align-items:stretch;
-    background:#7B4E3F;min-height:0;padding-top:48px}
-  /* картинка в разметке идёт первой (на десктопе она фон) — здесь она внизу */
-  .hero picture{order:2;display:block}
-  .hero__inner{order:1;position:static;padding:0 24px;gap:0;text-align:center;align-items:center}
+  /* ── Мобильный герой. Всё по ноде 1007:590 (холст 375x687) ───────────────
+     Снимок теперь на весь экран, а не полосой снизу: прямоугольник 766x1164
+     стоит в макете со сдвигом -275,-231 — эти же доли и задаём. Сверху лежит
+     затемнение, иначе лого и заголовок теряются на светлой части кадра. */
+  .hero{display:flex;flex-direction:column;align-items:stretch;position:relative;
+    background:#7B4E3F;min-height:687px;padding:36px 16px;overflow:hidden}
+  .hero::before{content:"";position:absolute;left:-2.7%;top:0;width:102.7%;height:47.9%;
+    z-index:1;pointer-events:none;
+    background:linear-gradient(180deg,#815748 0%,rgba(129,87,72,0) 100%)}
+  .hero picture{position:absolute;inset:0;z-index:0;display:block}
+  .hero__bg{position:absolute;left:-73.3%;top:-33.6%;width:204.3%;height:auto;
+    max-width:none;object-fit:fill}
+  .hero__inner{order:1;position:relative;z-index:2;flex:1;padding:0;gap:0;
+    text-align:center;align-items:center}
   .hero__logo{width:164px;margin-inline:auto}
-  .hero__body{max-width:none;width:100%;align-items:center;gap:24px;margin-top:37px}
-  /* WHY: у заголовка и лида в макете РАЗНАЯ ширина строки — 343 и 350.
-     Отсюда и разбивка на строки; при одинаковой ширине лид уезжает в 5 строк. */
-  .hero .h1{font-size:34px;line-height:40px;letter-spacing:-1px;max-width:343px}
-  /* WHY: перенос расставлен под десктоп, на узком экране он рвёт фразу не там.
-     Гасим его. Пробел на стыке даёт &nbsp; в самом тексте — он же не даёт
-     оторвать «и» от «метаболизм», и строки ложатся ровно как в макете. */
-  .hero .h1 br{display:none}
-  .hero__lead{max-width:350px;font-size:16px;line-height:21.4px}
-  .hero .btn{padding:14px 32px 15px}
-  /* 574 из 375 = 153% ширины, сдвиг влево на 199 = 53% — цифры из макета */
-  .hero__bg{position:static;width:153%;max-width:none;height:auto;
-    margin-left:-53%;margin-top:49px;object-fit:fill}
+  .hero__body{max-width:none;width:100%;flex:1;align-items:center;gap:16px;margin-top:19px}
+  .hero .h1{font-size:36px;line-height:40px;letter-spacing:0;max-width:none}
+  /* WHY: в макете строка лида набрана на 350 — шире текстового фрейма (343),
+     поэтому текст ложится в четыре строки, а не в пять. */
+  .hero__lead{width:350px;max-width:none;font-size:16px;line-height:21.4px}
+  /* кнопка во всю ширину и прижата к низу экрана */
+  .hero .btn{width:100%;justify-content:center;padding:14px 32px 15px;margin-top:auto}
   .quality{grid-template-columns:1fr;gap:40px}
   /* ── Баланс нутриентов на телефоне. Всё по ноде 977:652 (холст 375) ───────
      Это не сжатый десктоп: свои размеры текста и отдельно снятая картинка.
@@ -402,6 +402,11 @@ a.btn,button.btn{
    долголетие» встают справа, а «ЗОЖ» и «Спорт» — нижним рядом. Раскладка
    задана явно: при автопотоке порядок в разметке поставил бы «ЗОЖ» вторым. */
 @media (min-width:768px) and (max-width:1023px){
+  /* WHY: доли кадра сняты с холста 375x687. На планшете пропорция окна другая,
+     и при тех же долях в кадр попадает пустой верх. Здесь кадрируем по covers,
+     а точку 60/48 берём из центра той области, что видна в макете. */
+  .hero__bg{left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:60% 48%}
+
   /* Слайдер экспертов на планшете — как на десктопе: фото слева, текст справа,
      стрелки под текстом, а не на снимке. Высоту тексту не задаём: снимок здесь
      втрое ниже десктопного, и min-height оставил бы пустоту. */
@@ -443,7 +448,7 @@ a.btn,button.btn{
   <!-- ── Hero ── -->
   <section class="hero">
     <picture>
-      <source media="(max-width:1023px)" srcset="assets/hero-kv-mobile.webp" width="574" height="262">
+      <source media="(max-width:1023px)" srcset="assets/hero-kv-m1007.webp" width="766" height="1164">
       <img class="hero__bg" src="assets/hero-kv.webp" alt="Коктейли Кетолоджи" width="1440" height="657">
     </picture>
     <div class="hero__inner">
