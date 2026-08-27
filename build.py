@@ -383,34 +383,41 @@ def cmd_handover(args):
     base = args.base.rstrip('/') + '/'
     cmd_build(argparse.Namespace(base=base))
 
-    out = ROOT / 'handover'
-    if out.exists():
-        shutil.rmtree(out)
-    (out / 'assets').mkdir(parents=True)
-
-    used, pages = set(), []
+    # WHY: сначала собираем и проверяем всё в памяти и только потом пишем папку.
+    # Иначе упавшая проверка оставляла бы наполовину готовый пакет, который легко
+    # принять за настоящий.
+    frags, used = {}, set()
     for lang in locales():
         frag = (DIST / lang / 'fragment.html').read_text(encoding='utf-8')
         bad = [m for m in EDITOR_MARKS if m in frag]
         if bad:
-            print(f'  ✗ {lang}: в фрагменте следы редактора: {bad}')
+            print(f'  ✗ {lang}: в фрагменте следы редактора: {bad}. Пакет не собран.')
             return 1
-        (out / f'ketology-{lang}.html').write_text(frag, encoding='utf-8')
+        frags[lang] = frag
         used |= set(re.findall(re.escape(base) + r'(assets/[^"\')\s]+)', frag))
-        pages.append(lang)
 
+    missing = [r for r in sorted(used) if not (ROOT / r).exists()]
+    if missing:
+        print(f'  ✗ не хватает файлов: {missing}. Пакет не собран.')
+        return 1
+
+    out = ROOT / 'handover'
+    if out.exists():
+        shutil.rmtree(out)
+    out.mkdir(parents=True)
+    for lang, frag in frags.items():
+        (out / f'ketology-{lang}.html').write_text(frag, encoding='utf-8')
     for rel in sorted(used):
-        src = ROOT / rel
         dst = out / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, dst)
+        shutil.copy2(ROOT / rel, dst)
 
     doc = ROOT / 'ИНСТРУКЦИЯ_ПО_ИНТЕГРАЦИИ.md'
     if doc.exists():
         shutil.copy2(doc, out / 'ИНСТРУКЦИЯ.md')
 
     weight = sum((out / r).stat().st_size for r in used)
-    print(f'  страниц: {len(pages)} ({", ".join(pages)})')
+    print(f'  страниц: {len(frags)} ({", ".join(sorted(frags))})')
     print(f'  ассетов: {len(used)}, вес {weight / 1048576:.2f} МБ')
     print(f'  база путей: {base}')
     print(f'  готово: {out}')
