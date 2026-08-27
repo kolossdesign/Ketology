@@ -281,8 +281,10 @@ a.btn,button.btn{
      стоит в макете со сдвигом -275,-231 — эти же доли и задаём. Сверху лежит
      затемнение, иначе лого и заголовок теряются на светлой части кадра. */
   .hero{display:flex;flex-direction:column;align-items:stretch;position:relative;
-    background:#7B4E3F;min-height:687px;padding:36px 16px;overflow:hidden}
-  .hero::before{content:"";position:absolute;left:-2.7%;top:0;width:102.7%;height:47.9%;
+    background:#7B4E3F;min-height:740px;padding:36px 24px;overflow:hidden}
+  /* в макете затемнение на 47,9% высоты, но там лид в четыре строки; при полях 24
+     строк пять, и последняя выходила на светлую часть кадра — тянем до 53% */
+  .hero::before{content:"";position:absolute;left:-2.7%;top:0;width:102.7%;height:53%;
     z-index:1;pointer-events:none;
     background:linear-gradient(180deg,#815748 0%,rgba(129,87,72,0) 100%)}
   .hero picture{position:absolute;inset:0;z-index:0;display:block}
@@ -293,9 +295,7 @@ a.btn,button.btn{
   .hero__logo{width:164px;margin-inline:auto}
   .hero__body{max-width:none;width:100%;flex:1;align-items:center;gap:16px;margin-top:19px}
   .hero .h1{font-size:36px;line-height:40px;letter-spacing:0;max-width:none}
-  /* WHY: в макете строка лида набрана на 350 — шире текстового фрейма (343),
-     поэтому текст ложится в четыре строки, а не в пять. */
-  .hero__lead{width:350px;max-width:none;font-size:16px;line-height:21.4px}
+  .hero__lead{max-width:none;font-size:16px;line-height:21.4px}
   /* кнопка во всю ширину и прижата к низу экрана */
   .hero .btn{width:100%;justify-content:center;padding:14px 32px 15px;margin-top:auto}
   .quality{grid-template-columns:1fr;gap:40px}
