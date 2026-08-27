@@ -34,6 +34,7 @@ import_docx.py            забрать переводы из .docx обрат�
 
 ```bash
 python3 build.py build     # собрать все локали из content/*.json
+python3 build.py handover --base https://cdn/…/   # папка для передачи в еком
 python3 build.py new de    # завести новый язык (копия ru с пометками TODO)
 python3 build.py check     # что не переведено, где не хватает ключей
 python3 build.py find "…"  # найти ключ по тексту во всех языках
@@ -126,6 +127,11 @@ python3 build.py build
 не хватает ключей относительно `ru.json` или появились лишние.
 
 ## Интеграция в еком
+
+Что и как передавать — в `ИНСТРУКЦИЯ_ПО_ИНТЕГРАЦИИ.md`.
+Пакет собирается командой `python3 build.py handover --base …`: три файла
+языков без редактора плюс только те ассеты, которые реально используются.
+
 
 Берётся `dist/<lang>/fragment.html` — это `<style>` + `<div class="ketology-lp">…</div>`,
 **без шапки и подвала**: они приходят от самого екома.

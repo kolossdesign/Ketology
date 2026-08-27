@@ -8,6 +8,7 @@
   python3 build.py check                     — проверить локали без сборки
   python3 build.py find "кусок текста"        — найти ключ и все его переводы
   python3 build.py import-locales locales.json — забрать языки из редактора
+  python3 build.py handover --base https://cdn/…/ — папка для передачи в еком
 
 На каждую локаль получается два файла:
   dist/<lang>/index.html     — самостоятельная страница (для превью и GitHub Pages)
@@ -96,11 +97,16 @@ def to_fragment(page, lang):
     style = re.search(r'<style>(.*?)</style>', page, re.S).group(1)
     main = re.search(r'<main>(.*?)</main>', page, re.S).group(1)
     fonts = re.findall(r'<link rel="preload"[^>]*>', page)
+    # WHY: скрипт слайдера экспертов лежит в конце страницы, вне <main>, и раньше
+    # во фрагмент не попадал — в екоме второй слайд оставался скрытым навсегда.
+    # Редактора здесь быть не может: он добавляется отдельно, уже после этой функции.
+    scripts = re.findall(r'<script>.*?</script>', page, re.S)
     return (
         f'<!-- Ketology LP — {lang}. Сгенерировано build.py, править content/{lang}.json -->\n'
         + '\n'.join(fonts) + '\n'
         + f'<style>\n{RESET}\n{scope_css(style)}\n</style>\n'
         + f'<div class="ketology-lp">{main}</div>\n'
+        + '\n'.join(scripts) + '\n'
     )
 
 
@@ -362,6 +368,55 @@ def cmd_check(args):
     return 0 if ok else 1
 
 
+
+# ── Пакет для интеграции ──────────────────────────────────────────────────────
+EDITOR_MARKS = ('<x-t', 'contenteditable', 'lp-bar', 'lp-edit-btn',
+                'api.github.com', 'localStorage', 'ketology-locales')
+
+
+def cmd_handover(args):
+    """Готовит папку для передачи в еком: фрагменты всех языков + только нужные ассеты.
+
+    WHY: руками собирать нельзя — легко отдать превью с редактором или забыть
+    картинку. Здесь же стоит проверка: если в файл просочился редактор, сборка падает.
+    """
+    base = args.base.rstrip('/') + '/'
+    cmd_build(argparse.Namespace(base=base))
+
+    out = ROOT / 'handover'
+    if out.exists():
+        shutil.rmtree(out)
+    (out / 'assets').mkdir(parents=True)
+
+    used, pages = set(), []
+    for lang in locales():
+        frag = (DIST / lang / 'fragment.html').read_text(encoding='utf-8')
+        bad = [m for m in EDITOR_MARKS if m in frag]
+        if bad:
+            print(f'  ✗ {lang}: в фрагменте следы редактора: {bad}')
+            return 1
+        (out / f'ketology-{lang}.html').write_text(frag, encoding='utf-8')
+        used |= set(re.findall(re.escape(base) + r'(assets/[^"\')\s]+)', frag))
+        pages.append(lang)
+
+    for rel in sorted(used):
+        src = ROOT / rel
+        dst = out / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+
+    doc = ROOT / 'ИНСТРУКЦИЯ_ПО_ИНТЕГРАЦИИ.md'
+    if doc.exists():
+        shutil.copy2(doc, out / 'ИНСТРУКЦИЯ.md')
+
+    weight = sum((out / r).stat().st_size for r in used)
+    print(f'  страниц: {len(pages)} ({", ".join(pages)})')
+    print(f'  ассетов: {len(used)}, вес {weight / 1048576:.2f} МБ')
+    print(f'  база путей: {base}')
+    print(f'  готово: {out}')
+    return 0
+
+
 p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 sub = p.add_subparsers(dest='cmd', required=True)
 b = sub.add_parser('build'); b.add_argument('--base', default=''); b.set_defaults(fn=cmd_build)
@@ -369,5 +424,6 @@ n = sub.add_parser('new'); n.add_argument('lang'); n.set_defaults(fn=cmd_new)
 c = sub.add_parser('check'); c.set_defaults(fn=cmd_check)
 f = sub.add_parser('find'); f.add_argument('text'); f.set_defaults(fn=cmd_find)
 i = sub.add_parser('import-locales'); i.add_argument('file'); i.set_defaults(fn=cmd_import_locales)
+h = sub.add_parser('handover'); h.add_argument('--base', required=True); h.set_defaults(fn=cmd_handover)
 a = p.parse_args()
 sys.exit(a.fn(a))
