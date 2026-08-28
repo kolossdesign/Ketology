@@ -131,10 +131,17 @@ a.btn,button.btn{
 .nutri__foot{display:flex;gap:4px;font-size:14px;line-height:19px;font-weight:300;max-width:470px}
 /* WHY: снимок намеренно выходит за края блока — так он стоит в макете (нода 979:711).
    Контейнер повторяет холст 1440, поэтому координаты берутся прямо из Figma. */
-.nutri__media{position:absolute;z-index:1;left:50%;top:0;transform:translateX(-50%);
-  width:1440px;height:100%;pointer-events:none}
+/* WHY: холст больше не привязан к 1440 по центру. На широком экране снимок
+   оставался посередине, и справа зияла пустая полоса градиента — на 2560 это
+   356px. Теперь кадр прижат к правому краю окна и растёт вместе с ним.
+   На 1440 получаются ровно координаты макета: ширина 1036, вылет вправо 204.
+   Рост ограничен 1300 — дальше снимок начал бы наезжать на текст. */
+.nutri__media{position:absolute;z-index:1;left:0;right:0;top:0;
+  width:100%;height:100%;pointer-events:none}
 .nutri__media img{position:absolute;width:auto;max-width:none}
-.nutri__media .scene{left:608px;top:-70px;width:1036px}
+/* height:auto обязателен: без него от атрибута height остаётся 865 и кадр,
+   выросший в ширину, растягивается по горизонтали. */
+.nutri__media .scene{left:auto;right:-204px;top:-70px;width:min(71.94%, 1300px);height:auto}
 
 /* ── Сравнение ─────────────────────────────────────────────────────────────── */
 .compare__head{display:grid;grid-template-columns:638fr 325fr 325fr;gap:12px;margin-top:45px;margin-bottom:12px}
@@ -294,8 +301,15 @@ a.btn,button.btn{
      низу: банки всегда стоят между текстом и кнопкой, а на широком экране просто
      открывается больше фона по бокам. 157,3% и -29,05% — те же координаты макета,
      пересчитанные от высоты. Сдвиг влево на 79,5px повторяет кадрирование макета. */
-  .hero__bg{position:absolute;left:0;right:0;bottom:-29.05%;top:auto;
-    width:100%;height:157.3%;max-width:none;
+  /* WHY: кадр прижат к низу и растёт вместе с шириной экрана — банки становятся
+     крупнее, а не уезжают вниз. Размеры в vw: на 375 это ровно координаты макета
+     (высота 1164, вылет вниз 215), дальше всё масштабируется пропорционально.
+     Точка 70,3% повторяет кадрирование макета и закрывает экран целиком.
+     Рост ограничен шириной 480 — дальше телефонов не бывает, а без предела
+     на 700px банки становились больше экрана. */
+  .hero__bg{position:absolute;left:0;right:0;top:auto;
+    bottom:max(-56vw, -269px);
+    width:100%;height:min(310.4vw, 1490px);max-width:none;
     object-fit:cover;object-position:70.3% center}
   .hero__inner{order:1;position:relative;z-index:2;flex:1;padding:0;gap:0;
     text-align:center;align-items:center}
