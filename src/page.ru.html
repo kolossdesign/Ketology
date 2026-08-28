@@ -140,8 +140,17 @@ a.btn,button.btn{
   width:100%;height:100%;pointer-events:none}
 .nutri__media img{position:absolute;width:auto;max-width:none}
 /* height:auto обязателен: без него от атрибута height остаётся 865 и кадр,
-   выросший в ширину, растягивается по горизонтали. */
-.nutri__media .scene{left:auto;right:-204px;top:-70px;width:min(71.94%, 1300px);height:auto}
+   выросший в ширину, растягивается по горизонтали.
+   Нижняя граница 922px: при таком кадре высота ровно 770 — от -70 он доходит до
+   низа блока. Без неё на 1024-1439 снимок оказывался ниже блока и снизу
+   открывался пустой градиент.
+   Вылет вправо на узком десктопе увеличивается: иначе подросший кадр наезжает
+   на колонку с текстом. На 1440 и шире он остаётся макетным -204. */
+.nutri__media .scene{
+  left:auto;
+  right:min(-204px, calc(-204px - (1440px - 100vw) * 0.62));
+  top:-70px;width:clamp(922px, 71.94%, 1300px);height:auto;
+}
 
 /* ── Сравнение ─────────────────────────────────────────────────────────────── */
 .compare__head{display:grid;grid-template-columns:638fr 325fr 325fr;gap:12px;margin-top:45px;margin-bottom:12px}
