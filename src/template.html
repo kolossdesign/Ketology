@@ -325,13 +325,13 @@ a.btn,button.btn{
   /* WHY: кадр прижат к низу и растёт вместе с шириной экрана — банки становятся
      крупнее, а не уезжают вниз. Размеры в vw: на 375 это ровно координаты макета
      (высота 1164, вылет вниз 215), дальше всё масштабируется пропорционально.
-     Точка 70,3% повторяет кадрирование макета и закрывает экран целиком.
+     Точка 66,7% повторяет кадрирование макета и закрывает экран целиком.
      Рост ограничен шириной 480 — дальше телефонов не бывает, а без предела
      на 700px банки становились больше экрана. */
   .hero__bg{position:absolute;left:0;right:0;top:auto;
-    bottom:max(-56vw, -269px);
-    width:100%;height:min(310.4vw, 1490px);max-width:none;
-    object-fit:cover;object-position:70.3% center}
+    bottom:max(-59.5vw, -286px);
+    width:100%;height:min(350.4vw, 1682px);max-width:none;
+    object-fit:cover;object-position:66.7% center}
   .hero__inner{order:1;position:relative;z-index:2;flex:1;padding:0;gap:0;
     text-align:center;align-items:center}
   .hero__logo{width:164px;margin-inline:auto}
@@ -490,7 +490,7 @@ a.btn,button.btn{
   <!-- ── Hero ── -->
   <section class="hero">
     <picture>
-      <source media="(max-width:1023px)" srcset="assets/hero-kv-m1007.webp" width="766" height="1164">
+      <source media="(max-width:1023px)" srcset="assets/hero-kv-m1007-2.webp" width="864" height="1314">
       <img class="hero__bg" src="assets/hero-kv-1049.webp" alt="{{hero.alt_1}}" width="1440" height="657">
     </picture>
     <div class="hero__inner">
