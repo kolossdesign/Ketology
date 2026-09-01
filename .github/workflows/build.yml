@@ -42,11 +42,21 @@ jobs:
       - name: Собрать
         run: python3 build.py build --base https://kolossdesign.github.io/Ketology/
 
+      # WHY: пакет для разработчиков собирается тем же кодом, что и сайт, и кладётся
+      # рядом с ним. Тогда ссылка на архив всегда ведёт на актуальную версию, а не
+      # на то, что кто-то однажды выгрузил руками.
+      - name: Собрать пакет для интеграции
+        run: python3 build.py handover --base https://cdn.siberianhealth.com/ketology/
+
       - name: Сложить сайт
         run: |
           rm -rf _site && mkdir -p _site
           cp -r dist/* _site/
           cp -r assets _site/assets
+          mkdir -p _site/handover
+          cd handover && zip -qr ../_site/handover/ketology-integration.zip . && cd ..
+          cp handover/ИНСТРУКЦИЯ.md _site/handover/instruction.md
+          cp handover/ketology-*.html _site/handover/
           touch _site/.nojekyll
 
       # WHY: включить Pages впервые workflow не может — GitHub запрещает это
