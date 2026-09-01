@@ -39,14 +39,16 @@ jobs:
       - name: Проверить локали
         run: python3 build.py check
 
-      - name: Собрать
-        run: python3 build.py build --base https://kolossdesign.github.io/Ketology/
-
       # WHY: пакет для разработчиков собирается тем же кодом, что и сайт, и кладётся
-      # рядом с ним. Тогда ссылка на архив всегда ведёт на актуальную версию, а не
+      # рядом с ним. Идёт ПЕРЕД сборкой сайта: handover пересобирает dist с адресом
+      # CDN, и если сделать его после, в публикацию уедут пути на CDN, а превью
+      # останется без картинок. Тогда ссылка на архив всегда ведёт на актуальную версию, а не
       # на то, что кто-то однажды выгрузил руками.
       - name: Собрать пакет для интеграции
         run: python3 build.py handover --base https://cdn.siberianhealth.com/ketology/
+
+      - name: Собрать
+        run: python3 build.py build --base https://kolossdesign.github.io/Ketology/
 
       - name: Сложить сайт
         run: |
