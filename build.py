@@ -26,8 +26,7 @@ PLACEHOLDER = re.compile(r'\{\{([\w.]+)\}\}')
 TODO = 'TODO: '
 
 
-LANG_NAMES = {'ru': 'Русский', 'en': 'English', 'de': 'Deutsch',
-              'fr': 'Français', 'pl': 'Polski', 'kk': 'Қазақша', 'uz': 'Oʻzbekcha'}
+LANG_NAMES = {'ru': 'Русский', 'kk': 'Қазақша', 'uz': 'Oʻzbekcha'}
 # WHY: один репозиторий. Он же исходники, он же публикация — GitHub Actions
 # пересобирает сайт сам. Токену в браузере нужен доступ ровно к нему одному.
 REPOS = [{'repo': 'kolossdesign/Ketology', 'dir': 'content/'}]
